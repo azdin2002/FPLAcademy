@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,4 +38,19 @@ public class EtudiantRestController {
         
         return ResponseEntity.ok(inscriptions);
     }
+    
+//    @GetMapping("/cours/{id}")
+//    public ResponseEntity<Inscription> getCoursEtudiant(
+//            @PathVariable Long id,
+//            Authentication auth) {
+//
+//        User etudiant = userRepo.findByUsername(auth.getName());
+//
+//        Inscription inscription = inscriptionRepo
+//                .findByEtudiantIdAndCoursId(id, etudiant.getId())
+//                .orElseThrow(() -> new RuntimeException("Not enrolled"));
+//
+//        return ResponseEntity.ok(inscription);
+//    }
+
 }

@@ -130,7 +130,7 @@
 
         document.getElementById('pageTitle').textContent = course.titre + ' - Lecture';
         document.getElementById('coursTitle').textContent = course.titre;
-
+        document.getElementById("instructorInfo").textContent = course.enseignant.username;
         document.getElementById('coursContent').innerHTML = course.contenu;
 
         document.getElementById('progressValue').textContent = inscription.progression + '%';

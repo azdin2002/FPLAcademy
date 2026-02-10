@@ -10,7 +10,7 @@ import lombok.*;
 
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-@JsonIgnoreProperties({"inscriptions", "enseignant"})
+@JsonIgnoreProperties({"inscriptions"})
 @Entity
 public class Cours {
     @Id
