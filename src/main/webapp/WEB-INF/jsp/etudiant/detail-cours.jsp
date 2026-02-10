@@ -165,10 +165,6 @@
         location.reload();
     }
 
-    function showError() {
-         document.getElementById('coursContent').innerHTML = '<div class="alert alert-danger">Erreur lors du chargement du cours.</div>';
-    }
-
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
