@@ -1,26 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Dashboard Enseignant - FPL Academy</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Enseignant - FPL Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa; /* Light theme background */
-            color: #212529; /* Dark text */
+            background-color: #f8f9fa; /* Unified Light background */
+            color: #212529;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
         .main-content { flex: 1; }
 
-        /* --- Header --- */
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
+        /* --- Header Styling --- */
         .btn-purple {
             background-color: #764ba2;
             border-color: #764ba2;
@@ -29,88 +26,135 @@
             transition: all 0.2s ease;
         }
         .btn-purple:hover {
-            background-color: #5a377d; /* Darker purple on hover */
+            background-color: #5a377d;
             border-color: #5a377d;
-            color: white; /* Ensure text remains white on hover */
+            color: white;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.2);
         }
+        
+        /* --- Updated Header Button to match stat-badge style --- */
+			.btn-new-course {
+			    background-color: rgba(118, 75, 162, 0.08); /* Light purple tint */
+			    color: #764ba2; /* Dark purple text */
+			    border: 1px solid rgba(118, 75, 162, 0.1); /* Subtle border */
+			    font-weight: 600;
+			    padding: 10px 24px;
+			    border-radius: 25px;
+			    transition: all 0.2s ease;
+			    text-decoration: none;
+			    display: inline-flex;
+			    align-items: center;
+			    gap: 8px;
+			}
+			
+			.btn-new-course:hover {
+			    background-color: #764ba2; /* Switches to solid purple on hover */
+			    color: white;
+			    transform: translateY(-2px);
+			    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.2);
+			}
 
-        /* --- Table Container --- */
+        /* --- Table Container (Matches Student Cards) --- */
         .table-container {
-            background-color: #ffffff; /* White background for the table card */
-            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        /* --- Table Styling --- */
-        .table {
-            margin-bottom: 0;
-        }
+        /* --- Unified Table Styling --- */
+        .table { margin-bottom: 0; }
+        
         .table thead th {
-            background-color: #e9ecef; /* Light header for the table */
-            color: #495057;
-            border-bottom: 1px solid #dee2e6;
+            background-color: #ffffff; 
+            color: #6c757d;
+            border-bottom: 1px solid #e9ecef;
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.8rem;
-            padding: 1rem 1.5rem;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            padding: 1.2rem 1.5rem;
         }
+
         .table tbody tr {
             transition: background-color 0.2s ease;
             cursor: pointer;
         }
+
         .table tbody tr:hover {
-            background-color: #f1f3f5; /* Subtle gray hover for rows */
+            background-color: #fcfaff; /* Subtle purple-tinted hover */
         }
+
         .table td {
             border-top: 1px solid #e9ecef;
             vertical-align: middle;
             padding: 1.5rem;
         }
 
-        /* --- Interactive Elements in Table --- */
+        /* --- Content Styling --- */
         .course-title {
-            font-weight: 700; /* Bolder */
-            color: #212529; /* Very dark black for clarity */
-            font-size: 1.3rem; /* Significantly larger font size */
-            padding-left: 0.5rem; /* Padding on the left */
+            font-weight: 700;
+            color: #212529;
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
         }
-        .course-description-text { /* New class for description */
-            padding-left: 0.5rem; /* Align with title */
+        
+        .course-desc {
+            color: #6c757d;
+            font-size: 0.85rem;
+            max-width: 400px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+
         .stat-badge {
-            background-color: rgba(118, 75, 162, 0.1);
+            background-color: rgba(118, 75, 162, 0.08);
             color: #764ba2;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 20px;
-            font-weight: 500;
+            font-weight: 600;
             text-decoration: none;
             transition: all 0.2s ease;
-            display: inline-flex; /* For icon alignment */
+            display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            font-size: 0.85rem;
         }
+
         .stat-badge:hover {
             background-color: #764ba2;
             color: white;
+            transform: scale(1.05);
         }
+
         .action-buttons a, .action-buttons button {
-            color: #6c757d; /* Gray icons */
+            color: #adb5bd;
             background: none;
             border: none;
             padding: 0.5rem;
-            margin-left: 0.5rem;
-            cursor: pointer;
-            transition: color 0.2s ease;
-            font-size: 1.1rem; /* Slightly larger icons */
+            margin-left: 0.3rem;
+            transition: all 0.2s ease;
         }
-        .action-buttons a:hover {
-            color: #764ba2; /* Purple hover for edit */
+
+        .action-buttons a:hover { color: #764ba2; }
+        .action-buttons .btn-delete:hover { color: #dc3545; }
+
+        /* Unified Stats Header */
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #764ba2;
+            line-height: 1;
         }
-        .action-buttons .btn-delete:hover {
-            color: #dc3545; /* Red hover for delete */
+        .stat-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6c757d;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -119,30 +163,39 @@
 <%@ include file="../common/header.jsp" %>
 
 <div class="container mt-5 main-content">
-    <div class="dashboard-header">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">Mes Cours Publiés</h2>
-            <p class="text-muted mb-0">Gérez vos contenus et suivez vos étudiants.</p>
+    <div class="row mb-4 align-items-end">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-dark mb-2">Tableau de bord Enseignant</h2>
+            <p class="text-muted lead mb-0" style="font-size: 1.1rem;">
+                G&eacute;rez vos contenus et suivez la progression de vos &eacute;tudiants.
+            </p>
         </div>
-        <a href="/enseignant/publier" class="btn btn-purple shadow-sm px-4 py-2 rounded-pill">
-            <i class="fas fa-plus me-2"></i>Nouveau Cours
-        </a>
+        <div class="col-md-4 text-md-end mt-4 mt-md-0">
+             <div class="d-inline-block text-end me-4">
+                <div class="stat-number" id="totalCourses">0</div>
+                <div class="stat-label">Cours Publi&eacute;s</div>
+             </div>
+             <a href="/enseignant/publier" class="btn-new-course shadow-sm">
+    			<i class="fas fa-plus"></i> Nouveau Cours
+			</a>
+        </div>
     </div>
 
-    <div id="successMessage" class="alert alert-success" style="display:none;"></div>
+    <hr class="mb-5" style="border-top: 1px solid #e9ecef; opacity: 1;">
 
-    <div class="table-container">
+    <div id="successMessage" class="alert alert-success border-0 shadow-sm mb-4" style="display:none; background-color: #d1e7dd; color: #0f5132;"></div>
+
+    <div class="table-container mb-5">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Cours</th>
-                    <th class="text-center">Étudiants Inscrits</th>
-                    <th class="text-end">Actions</th>
+                    <th>D&eacute;tails du Cours</th>
+                    <th class="text-center">Communaut&eacute;</th>
+                    <th class="text-end">Gestion</th>
                 </tr>
             </thead>
             <tbody id="coursTableBody">
-                <!-- JS will populate this -->
-            </tbody>
+                </tbody>
         </table>
     </div>
 </div>
@@ -180,6 +233,9 @@
 
     function displayCours(courses) {
         const tbody = document.getElementById('coursTableBody');
+        const countElement = document.getElementById('totalCourses');
+
+        countElement.textContent = courses ? courses.length : 0;
 
         if (!courses || courses.length === 0) {
             tbody.innerHTML = `<tr><td colspan="3" class="text-center py-5 text-muted">Vous n'avez pas encore publié de cours.</td></tr>`;

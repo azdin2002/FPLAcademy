@@ -1,119 +1,133 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier le Cours - FPL Academy</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-light: #f8fafc; /* Very light slate blue/gray */
-            --card-bg: #ffffff;
-            --input-focus: #f1f5f9;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-        }
-
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Unified Light background */
+            color: #212529;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
         }
+        .main-content { flex: 1; }
 
+        /* --- Return Button Style (Matches stat-badge) --- */
+        .btn-return {
+            background-color: rgba(118, 75, 162, 0.08);
+            color: #764ba2;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(118, 75, 162, 0.1);
+        }
+        .btn-return:hover {
+            background-color: #764ba2;
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        /* --- Card Styling --- */
         .card-premium {
-            background-color: var(--card-bg);
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             overflow: hidden;
         }
-
-        .card-header-premium {
-            background: #ffffff;
-            border-bottom: 1px solid #f1f5f9;
-            padding: 2.5rem 2.5rem 1.5rem 2.5rem;
+        .card-header-clean {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1.5rem 2rem;
         }
 
+        /* --- Form Styling --- */
         .form-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1.2px;
-            color: var(--text-muted);
+            color: #6c757d;
             font-weight: 700;
             margin-bottom: 0.6rem;
         }
-
         .form-control {
-            background-color: #ffffff;
-            border: 1.5px solid #e2e8f0;
-            color: var(--text-main);
-            border-radius: 14px;
-            padding: 0.85rem 1.2rem;
-            transition: all 0.2s ease-in-out;
+            border: 1.5px solid #e9ecef;
+            border-radius: 10px;
+            padding: 0.85rem 1.1rem;
             font-size: 0.95rem;
+            transition: all 0.2s;
         }
-
         .form-control:focus {
-            background-color: #ffffff;
             border-color: #764ba2;
             box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.1);
             outline: none;
         }
 
-        /* Subtle glow for the whole form area on focus */
-        .form-control:focus::placeholder {
-            color: #cbd5e1;
-        }
-
+        /* --- Action Buttons --- */
         .btn-save {
-            background: var(--primary-gradient);
-            border: none;
+            background-color: #764ba2;
+            border-color: #764ba2;
             color: white;
-            padding: 14px 40px;
-            border-radius: 14px;
+            padding: 12px 30px;
+            border-radius: 25px;
             font-weight: 700;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.2);
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.2);
         }
-
         .btn-save:hover {
+            background-color: #5a377d;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.3);
+            box-shadow: 0 8px 18px rgba(118, 75, 162, 0.3);
             color: white;
-            filter: brightness(1.1);
         }
-
-        .btn-cancel {
-            color: var(--text-muted);
+        .btn-cancel-text {
+            color: #6c757d;
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9rem;
             transition: color 0.2s;
         }
-
-        .btn-cancel:hover {
-            color: var(--text-main);
-        }
-
-        /* Clean Scrollbar */
+        .btn-cancel-text:hover { color: #212529; }
+        
         textarea::-webkit-scrollbar { width: 6px; }
-        textarea::-webkit-scrollbar-track { background: #f1f5f9; }
         textarea::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
+<%@ include file="../common/header.jsp" %>
+
+<div class="container mt-5 main-content">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <a href="/enseignant/dashboard" class="btn-return">
+                <i class="fas fa-arrow-left"></i> Retour au Dashboard
+            </a>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 1px;">Mode Instructor &bull; Edition</span>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mb-5">
         <div class="col-md-10 col-lg-8">
             <div class="card card-premium">
-                <div class="card-header-premium text-center">
-                    <h2 class="fw-bold mb-1" id="pageTitle" style="color: #0f172a;">Modifier le cours</h2>
-                    <p class="text-muted mb-0">Mettez &agrave; jour les d&eacute;tails de votre formation professionnelle.</p>
+                <div class="card-header-clean text-center">
+                    <h2 class="fw-bold mb-1 text-dark" id="pageTitle">Modifier le cours</h2>
+                    <p class="text-muted mb-0 small">Mettez &agrave; jour les d&eacute;tails et le contenu de votre formation.</p>
                 </div>
                 
                 <div class="card-body p-4 p-md-5">
@@ -127,38 +141,39 @@
 
                         <div class="mb-4">
                             <label class="form-label">Description courte</label>
-                            <textarea id="description" class="form-control" rows="2" placeholder="Un r&eacute;sum&eacute; accrocheur pour vos &eacute;tudiants..." required></textarea>
+                            <textarea id="description" class="form-control" rows="2" placeholder="R&eacute;sumez l'objectif du cours..." required></textarea>
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label">Contenu d&eacute;taill&eacute;</label>
-                            <textarea id="contenu" class="form-control" rows="10" placeholder="R&eacute;digez le corps de votre cours..."></textarea>
+                            <textarea id="contenu" class="form-control" rows="12" placeholder="R&eacute;digez le corps de votre cours..."></textarea>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center mt-5">
-                            <a href="/enseignant/dashboard" class="btn-cancel">
-                                <i class="fas fa-chevron-left me-1"></i> Annuler
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <a href="/enseignant/dashboard" class="btn-cancel-text">
+                                Annuler
                             </a>
                             <button type="submit" class="btn btn-save" id="submitBtn">
-                                Sauvegarder les modifications
+                                <i class="fas fa-save me-2"></i>Enregistrer les modifications
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
             
-            <div class="text-center mt-4 text-muted small" style="letter-spacing: 1px;">
-                <strong>FPL ACADEMY</strong> &bull; ESPACE ENSEIGNANT
+            <div class="text-center mt-4 text-muted small" style="letter-spacing: 1px; opacity: 0.6;">
+                <strong>FPL ACADEMY</strong> &bull; GESTION DE CONTENU
             </div>
         </div>
     </div>
 </div>
 
+<%@ include file="../common/footer.jsp" %>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
-	const pathParts = window.location.pathname.split('/');
-	const courseId = pathParts[pathParts.length - 1];
+    const pathParts = window.location.pathname.split('/');
+    const courseId = pathParts[pathParts.length - 1];
 
     async function loadCourse() {
         try {
@@ -204,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             alert('Erreur lors de la modification.');
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Sauvegarder les modifications';
+            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Enregistrer les modifications';
         }
     });
 

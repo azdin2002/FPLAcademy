@@ -1,97 +1,113 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Liste des &eacute;tudiants - FPL Academy</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root {
-            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-dark: #0f1113;
-            --card-bg: #1a1d20;
-        }
-
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-dark);
-            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Unified Light background */
+            color: #212529;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
-
         .main-content { flex: 1; padding-bottom: 3rem; }
 
-        /* Premium Card Header */
+        /* --- Return Button Style (Matches stat-badge) --- */
+        .btn-return {
+            background-color: rgba(118, 75, 162, 0.08);
+            color: #764ba2;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(118, 75, 162, 0.1);
+        }
+        .btn-return:hover {
+            background-color: #764ba2;
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        /* --- Header Section --- */
         .page-header {
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .card-custom {
-            background-color: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        /* --- Table Container (Matches Dashboard Cards) --- */
+        .card-premium {
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             overflow: hidden;
         }
 
-        /* Table Styling */
-        .table { color: #cbd5e0; margin-bottom: 0; }
+        /* --- Unified Table Styling --- */
+        .table { margin-bottom: 0; }
         
-        .table-dark-header th {
-            background-color: rgba(255,255,255,0.02);
-            color: #718096;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        .table thead th {
+            background-color: #ffffff;
+            color: #6c757d;
+            border-bottom: 1px solid #e9ecef;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.75rem;
             letter-spacing: 1px;
-            padding: 1.25rem 1rem;
+            padding: 1.25rem 1.5rem;
         }
 
         .table td { 
-            padding: 1.25rem 1rem; 
-            border-bottom: 1px solid rgba(255,255,255,0.03);
+            padding: 1.25rem 1.5rem; 
+            border-top: 1px solid #f1f3f5;
             vertical-align: middle;
         }
 
         .table-hover tbody tr:hover { 
-            background-color: rgba(255,255,255,0.02);
-            transition: background 0.2s ease;
+            background-color: #fcfaff; /* Subtle purple tint */
         }
 
-        /* User Avatar */
-        .avatar-circle {
-            background: var(--accent-gradient);
-            font-weight: 700;
-            box-shadow: 0 4px 10px rgba(118, 75, 162, 0.3);
-        }
-
-        /* Progress Bar */
+        /* --- Progress Bar --- */
         .progress { 
-            height: 6px; 
-            background-color: #2d3748; 
+            height: 8px; 
+            background-color: #e9ecef; 
             border-radius: 10px; 
-            overflow: visible;
         }
         .progress-bar { 
             border-radius: 10px; 
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+            background-color: #764ba2;
         }
 
-        /* Badges */
-        .badge-premium {
-            padding: 0.5em 1em;
-            border-radius: 6px;
+        /* --- Badges --- */
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
             font-weight: 600;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
-        .bg-success-subtle { background: rgba(72, 187, 120, 0.1); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.2); }
-        .bg-warning-subtle { background: rgba(237, 137, 54, 0.1); color: #ed8936; border: 1px solid rgba(237, 137, 54, 0.2); }
+        .status-complete { background: rgba(25, 135, 84, 0.1); color: #198754; }
+        .status-ongoing { background: rgba(118, 75, 162, 0.1); color: #764ba2; }
+
+        /* --- Avatar --- */
+        .avatar-circle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+            border-radius: 10px; /* Modern rounded-square look */
+        }
     </style>
 </head>
 <body>
@@ -99,31 +115,33 @@
 <%@ include file="../common/header.jsp" %>
 
 <div class="container mt-5 main-content">
-    <div class="d-flex justify-content-between align-items-center page-header">
-        <div>
-            <h3 class="fw-bold text-white mb-1">&Eacute;tudiants inscrits</h3>
-            <p class="text-muted small mb-0">Gestion et suivi de la progression en temps r&eacute;el</p>
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-7">
+            <h2 class="fw-bold text-dark mb-1">&Eacute;tudiants Inscrits</h2>
+            <p class="text-muted mb-0">Suivi d&eacute;taill&eacute; de la progression de vos apprenants.</p>
         </div>
-        <a href="/enseignant/dashboard" class="btn btn-outline-light btn-sm rounded-pill px-3">
-            <i class="fas fa-arrow-left me-2"></i> Retour
-        </a>
+        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+            <a href="/enseignant/dashboard" class="btn-return">
+                <i class="fas fa-arrow-left"></i> Retour au Dashboard
+            </a>
+        </div>
     </div>
 
-    <div class="card card-custom">
+    <div class="card card-premium">
         <div class="table-responsive">
             <table class="table table-hover">
-                <thead class="table-dark-header">
+                <thead>
                 <tr>
-                    <th class="ps-4">&Eacute;tudiant</th>
+                    <th>&Eacute;tudiant</th>
                     <th>Progression</th>
-                    <th>Statut</th>
-                    <th class="text-end pe-4">Date d'inscription</th>
+                    <th class="text-center">Statut</th>
+                    <th class="text-end">Date d'inscription</th>
                 </tr>
                 </thead>
                 <tbody id="etudiantsBody">
                     <tr>
                         <td colspan="4" class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status"></div>
+                            <div class="spinner-border text-primary opacity-25" role="status"></div>
                         </td>
                     </tr>
                 </tbody>
@@ -139,7 +157,7 @@
 
     async function loadInscriptions() {
         try {
-            const res = await fetch(`/api/enseignant/cours/${coursId}/inscriptions`);
+            const res = await fetch(`/api/enseignant/cours/\${coursId}/inscriptions`);
             if (!res.ok) throw new Error();
             const inscriptions = await res.json();
             const tbody = document.getElementById("etudiantsBody");
@@ -148,47 +166,45 @@
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="4" class="text-center py-5 text-muted">
-                            <i class="fas fa-user-friends fa-3x mb-3 opacity-20"></i><br>
-                            Aucun &eacute;tudiant n'est encore inscrit.
+                            <i class="fas fa-user-friends fa-2x mb-3 opacity-25"></i><br>
+                            Aucun &eacute;tudiant n'est encore inscrit &agrave; ce cours.
                         </td>
                     </tr>`;
                 return;
             }
 
             tbody.innerHTML = inscriptions.map(i => {
-                // Unicode for accents to prevent Eclipse bugs
                 const statusLabel = i.termine ? 'Termin\u00E9' : 'En cours';
-                const statusClass = i.termine ? 'bg-success-subtle' : 'bg-warning-subtle';
+                const statusClass = i.termine ? 'status-complete' : 'status-ongoing';
                 const icon = i.termine ? 'fa-check-circle' : 'fa-clock';
                 
                 return `
                 <tr>
-                    <td class="ps-4">
+                    <td>
                         <div class="d-flex align-items-center">
-                            <div class="avatar-circle rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; color: white;">
+                            <div class="avatar-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
                                 \${i.etudiant.username.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <div class="fw-bold text-white">\${escapeHtml(i.etudiant.username)}</div>
-                                <div style="font-size: 0.7rem; color: #718096;">ID #\${i.etudiant.id}</div>
+                                <div class="fw-bold text-dark">\${escapeHtml(i.etudiant.username)}</div>
+                                <div class="text-muted small" style="font-size: 0.7rem;">ID #\${i.etudiant.id}</div>
                             </div>
                         </div>
                     </td>
-                    <td style="width: 25%;">
+                    <td style="width: 30%;">
                         <div class="d-flex align-items-center">
                             <div class="progress flex-grow-1 me-3">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: \${i.progression}%; background: var(--accent-gradient);"></div>
+                                <div class="progress-bar" role="progressbar" style="width: \${i.progression}%"></div>
                             </div>
-                            <span class="fw-bold small">\${i.progression}%</span>
+                            <span class="fw-bold small text-dark" style="min-width: 40px;">\${i.progression}%</span>
                         </div>
                     </td>
-                    <td>
-                        <span class="badge-premium \${statusClass}">
-                            <i class="fas \${icon} me-1"></i> \${statusLabel}
+                    <td class="text-center">
+                        <span class="badge-status \${statusClass}">
+                            <i class="fas \${icon}"></i> \${statusLabel}
                         </span>
                     </td>
-                    <td class="text-end pe-4 text-muted small">
+                    <td class="text-end text-muted small">
                         \${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
                 </tr>`;
@@ -201,6 +217,7 @@
     }
 
     function escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
