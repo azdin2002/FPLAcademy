@@ -9,8 +9,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #121212; /* Dark background */
-            color: #e0e0e0; /* Light text */
+            background-color: #f8f9fa; /* Light background */
+            color: #212529; /* Dark text */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -19,32 +19,75 @@
             flex: 1;
         }
         .card {
-            background-color: #1e1e1e; /* Darker card background */
-            border: 1px solid #333;
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
         }
-        .text-dark { color: #e0e0e0 !important; }
-        .text-muted { color: #adb5bd !important; }
-        .course-card { border: none; transition: transform 0.2s, box-shadow 0.2s; border-radius: 12px; }
+        .course-card {
+            border: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            height: 100%;
+        }
         .course-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(118, 75, 162, 0.2);
+            box-shadow: 0 8px 20px rgba(118, 75, 162, 0.15);
         }
-        .btn-status {
-            background-color: #2c3e50;
-            color: #adb5bd;
-            font-weight: bold;
-            padding: 8px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #343a40;
+
+        .btn-primary-custom {
+            background-color: #764ba2 !important;
+            border-color: #764ba2 !important;
+            color: white !important;
+            border-radius: 50px;
+            font-weight: 600;
+            width: 100%;
+            padding: 0.6rem;
+            transition: all 0.2s;
         }
-        .btn-primary {
-            background-color: #764ba2;
-            border-color: #764ba2;
+        .btn-primary-custom:hover {
+            background-color: #5e3c82 !important;
+            border-color: #5e3c82 !important;
+            color: white !important;
         }
-        .btn-primary:hover {
-            background-color: #5a377d;
-            border-color: #5a377d;
+
+        .btn-unsubscribe {
+            background-color: #e9ecef !important;
+            color: #dc3545 !important; /* Red text for danger action */
+            border: 1px solid #dee2e6 !important;
+            border-radius: 50px;
+            font-weight: 600;
+            width: 100%;
+            padding: 0.6rem;
+            transition: all 0.2s;
+        }
+        .btn-unsubscribe:hover {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545 !important;
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #764ba2;
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6c757d;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        a.course-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        a.course-link:hover h5 {
+            color: #764ba2 !important;
+            transition: color 0.2s;
         }
     </style>
 </head>
@@ -53,14 +96,22 @@
 <%@ include file="../common/header.jsp" %>
 
 <div class="container mt-5 main-content">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2 class="fw-bold text-dark">Catalogue des formations</h2>
-            <p class="text-muted">Découvrez nos nouveaux cours et développez vos compétences.</p>
+    <div class="row mb-4 align-items-end">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-dark mb-2">Catalogue des formations</h2>
+            <p class="text-muted lead mb-0">Découvrez nos nouveaux cours et développez vos compétences.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-4 mt-md-0">
+             <div class="d-inline-block text-end">
+                <div class="stat-number" id="coursesCount">0</div>
+                <div class="stat-label">Cours disponibles</div>
+             </div>
         </div>
     </div>
 
-    <div class="row" id="catalogueContainer">
+    <hr class="mb-5" style="border-top: 1px solid #e9ecef; opacity: 1;">
+
+    <div class="row mb-5" id="catalogueContainer">
         <!-- JS will populate this -->
     </div>
 </div>
@@ -73,9 +124,11 @@ async function loadCatalogue() {
         console.log("📡 load catalogue");
 
         const resCours = await fetch('/api/cours');
+        if (!resCours.ok) throw new Error('Failed to fetch courses');
         const courses = await resCours.json();
 
         const resInsc = await fetch('/api/inscriptions/etudiant');
+        if (!resInsc.ok) throw new Error('Failed to fetch inscriptions');
         const inscriptions = await resInsc.json();
 
         displayCourses(courses, inscriptions);
@@ -89,6 +142,11 @@ async function loadCatalogue() {
 
 function displayCourses(courses, inscriptions) {
     const container = document.getElementById('catalogueContainer');
+    const countElement = document.getElementById('coursesCount');
+
+    console.log("Courses received:", courses); // DEBUG
+    countElement.textContent = courses.length;
+
     let html = '';
 
     if (courses.length === 0) {
@@ -102,31 +160,40 @@ function displayCourses(courses, inscriptions) {
     }
 
     courses.forEach(course => {
-        const isEnrolled = inscriptions.some(i => i.cours.id === course.id);
+        try {
+            const inscription = inscriptions.find(i => i.cours.id === course.id);
+            const isEnrolled = !!inscription;
+            const courseUrl = '/etudiant/cours/' + course.id;
 
-        html +=
-            '<div class="col-md-6 col-lg-4 mb-4">' +
-            '  <div class="card course-card h-100 shadow-sm">' +
-            '    <div class="card-body">' +
-            '      <h5 class="fw-bold text-dark">' + escapeHtml(course.titre) + '</h5>' +
-            '      <p class="text-muted small">' + escapeHtml(course.description) + '</p>' +
-            '      <div class="mt-4">';
+            html += `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card course-card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-3">
+                                <a href="\${courseUrl}" class="course-link">
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-size: 1.25rem;">\${escapeHtml(course.titre)}</h5>
+                                </a>
+                                <div class="text-muted small" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                                    PAR <span class="fw-bold text-secondary text-uppercase">\${escapeHtml(course.enseignant ? course.enseignant.username : 'Inconnu')}</span>
+                                </div>
+                            </div>
+                            <p class="card-text text-muted small text-truncate mb-4">
+                                \${escapeHtml(course.description)}
+                            </p>
 
-        if (isEnrolled) {
-            html +=
-                '<div class="btn-status"><i class="fas fa-check-circle me-2"></i>Déjà inscrit</div>';
-        } else {
-            html +=
-                '<button class="btn btn-primary w-100 fw-bold rounded-pill" ' +
-                'onclick="enrollCourse(' + course.id + ')" ' +
-                'id="btn-' + course.id + '">S\'inscrire</button>';
+                            <div class="mt-auto">
+                                \${isEnrolled ?
+                                    `<button class="btn btn-unsubscribe" onclick="unsubscribe(\${inscription.id})">Se désinscrire</button>` :
+                                    `<button class="btn btn-primary-custom" onclick="enrollCourse(\${course.id})" id="btn-\${course.id}">S'inscrire</button>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } catch (e) {
+            console.error("Error processing course:", course, e);
         }
-
-        html +=
-            '      </div>' +
-            '    </div>' +
-            '  </div>' +
-            '</div>';
     });
 
     container.innerHTML = html;
@@ -150,9 +217,34 @@ async function enrollCourse(id) {
     }
 }
 
+async function unsubscribe(inscriptionId) {
+    if (!confirm("Êtes-vous sûr de vouloir vous désinscrire de ce cours ?")) {
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/inscriptions/' + inscriptionId, {
+            method: 'DELETE'
+        });
+
+        if (res.ok) {
+            // Reload to refresh the list and status
+            loadCatalogue();
+        } else {
+            alert("Erreur lors de la désinscription.");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Erreur lors de la désinscription.");
+    }
+}
+
 function escapeHtml(text) {
+    if (text === null || text === undefined) {
+        return '';
+    }
     const div = document.createElement('div');
-    div.textContent = text || '';
+    div.textContent = text;
     return div.innerHTML;
 }
 

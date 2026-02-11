@@ -10,7 +10,7 @@ import lombok.*;
 
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-@JsonIgnoreProperties({"inscriptions"})
+@JsonIgnoreProperties({"inscriptions", "hibernateLazyInitializer", "handler"})
 @Entity
 public class Cours {
     @Id
