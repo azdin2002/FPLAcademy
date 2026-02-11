@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 
 @Entity 
 @Table(name = "inscriptions")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Inscription {
 
     @Id
@@ -14,12 +15,12 @@ public class Inscription {
 
     @ManyToOne
     @JoinColumn(name = "etudiant_id")
-    @JsonIgnoreProperties({"roles", "password"})
+    @JsonIgnoreProperties({"roles", "password", "hibernateLazyInitializer", "handler"})
     private User etudiant;
 
     @ManyToOne
     @JoinColumn(name = "cours_id")
-    @JsonIgnoreProperties("inscriptions")
+    @JsonIgnoreProperties({"inscriptions", "hibernateLazyInitializer", "handler"})
     private Cours cours;
 
     private int progression = 0;

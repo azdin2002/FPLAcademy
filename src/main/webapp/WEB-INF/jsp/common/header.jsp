@@ -123,9 +123,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/etudiant/catalogue">Catalogue</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/etudiant/dashboard#cours">Mes Cours</a>
-                    </li>
                 </sec:authorize>
 
                 <!-- Teacher Links -->
