@@ -37,18 +37,17 @@ public class InscriptionRestController {
 
         int augmentation = payload.getOrDefault("augmentation", 25);
 
-        // Update progression
-        Inscription updated = inscriptionService.updateProgression(id, augmentation);
-
-        // Return fresh DTO using coursId + username
+        InscriptionEtudiantDTO updated = inscriptionService.updateProgression(id, augmentation);
         InscriptionEtudiantDTO dto =
                 inscriptionService.getInscriptionDTOByCours(
-                        updated.getCours().getId(),
+                        updated.getCoursId(),
                         auth.getName()
                 );
 
         return ResponseEntity.ok(dto);
     }
+
+
 
 
 
