@@ -109,7 +109,16 @@
         </div>
     </div>
 
-    <hr class="mb-5" style="border-top: 1px solid #e9ecef; opacity: 1;">
+    <hr class="mb-4" style="border-top: 1px solid #e9ecef; opacity: 1;">
+
+    <div class="row mb-4 justify-content-end">
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" class="form-control" id="courseSearch" placeholder="Rechercher un cours...">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+            </div>
+        </div>
+    </div>
 
     <div class="row mb-5" id="catalogueContainer">
         <!-- JS will populate this -->
@@ -119,10 +128,12 @@
 <%@ include file="../common/footer.jsp" %>
 
 <script>
+// Global variables to store original data
+let allCoursesData = [];
+let allInscriptionsData = [];
+
 async function loadCatalogue() {
     try {
-        console.log("📡 load catalogue");
-
         const resCours = await fetch('/api/cours');
         if (!resCours.ok) throw new Error('Failed to fetch courses');
         const courses = await resCours.json();
@@ -131,7 +142,12 @@ async function loadCatalogue() {
         if (!resInsc.ok) throw new Error('Failed to fetch inscriptions');
         const inscriptions = await resInsc.json();
 
-        displayCourses(courses, inscriptions);
+        allCoursesData = courses;
+        allInscriptionsData = inscriptions;
+
+        document.getElementById('coursesCount').textContent = allCoursesData.length;
+
+        displayCourses(allCoursesData, allInscriptionsData);
 
     } catch (e) {
         console.error(e);
@@ -140,27 +156,15 @@ async function loadCatalogue() {
     }
 }
 
-function displayCourses(courses, inscriptions) {
+function displayCourses(coursesToDisplay, inscriptions) {
     const container = document.getElementById('catalogueContainer');
-    const countElement = document.getElementById('coursesCount');
-
-    console.log("Courses received:", courses); // DEBUG
-    countElement.textContent = courses.length;
 
     let html = '';
 
-    if (courses.length === 0) {
-        container.innerHTML = `
-            <div class="col-12 text-center py-5">
-                <div class="display-1 text-muted">📚</div>
-                <h4 class="text-muted mt-3">Aucun cours disponible pour le moment.</h4>
-            </div>
-        `;
-        return;
-    }
-
-    courses.forEach(course => {
-        try {
+    if (coursesToDisplay.length === 0) {
+        html = `<div class="col-12 text-center py-5"><h4 class="text-muted">Aucun cours trouvé.</h4></div>`;
+    } else {
+        coursesToDisplay.forEach(course => {
             const inscription = inscriptions.find(i => i.cours.id === course.id);
             const isEnrolled = !!inscription;
             const courseUrl = '/etudiant/cours/' + course.id;
@@ -191,10 +195,8 @@ function displayCourses(courses, inscriptions) {
                     </div>
                 </div>
             `;
-        } catch (e) {
-            console.error("Error processing course:", course, e);
-        }
-    });
+        });
+    }
 
     container.innerHTML = html;
 }
@@ -204,9 +206,7 @@ async function enrollCourse(id) {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Traitement...';
 
-    const res = await fetch('/api/inscriptions/inscrire/' + id, {
-        method: 'POST'
-    });
+    const res = await fetch('/api/inscriptions/inscrire/' + id, { method: 'POST' });
 
     if (res.ok) {
         window.location.href = '/etudiant/dashboard';
@@ -218,17 +218,11 @@ async function enrollCourse(id) {
 }
 
 async function unsubscribe(inscriptionId) {
-    if (!confirm("Êtes-vous sûr de vouloir vous désinscrire de ce cours ?")) {
-        return;
-    }
+    if (!confirm("Êtes-vous sûr de vouloir vous désinscrire de ce cours ?")) return;
 
     try {
-        const res = await fetch('/api/inscriptions/' + inscriptionId, {
-            method: 'DELETE'
-        });
-
+        const res = await fetch('/api/inscriptions/' + inscriptionId, { method: 'DELETE' });
         if (res.ok) {
-            // Reload to refresh the list and status
             loadCatalogue();
         } else {
             alert("Erreur lors de la désinscription.");
@@ -240,15 +234,32 @@ async function unsubscribe(inscriptionId) {
 }
 
 function escapeHtml(text) {
-    if (text === null || text === undefined) {
-        return '';
-    }
+    if (text === null || text === undefined) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-document.addEventListener('DOMContentLoaded', loadCatalogue);
+document.addEventListener('DOMContentLoaded', () => {
+    loadCatalogue();
+
+    const courseSearchInput = document.getElementById('courseSearch');
+    if (courseSearchInput) {
+        courseSearchInput.addEventListener('input', (event) => {
+            const searchTerm = event.target.value.toLowerCase();
+            const filteredCourses = allCoursesData.filter(course => {
+                const title = course.titre ? course.titre.toLowerCase() : '';
+                const description = course.description ? course.description.toLowerCase() : '';
+                const instructor = course.enseignant && course.enseignant.username ? course.enseignant.username.toLowerCase() : '';
+
+                return title.includes(searchTerm) ||
+                       description.includes(searchTerm) ||
+                       instructor.includes(searchTerm);
+            });
+            displayCourses(filteredCourses, allInscriptionsData);
+        });
+    }
+});
 </script>
 
 </body>
