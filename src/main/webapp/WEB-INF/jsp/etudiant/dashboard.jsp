@@ -129,13 +129,13 @@
                     </span>
                     <div class="card-body d-flex flex-column">
                         <div class="mb-3">
-                            <h5 class="card-title fw-bold text-dark mb-1" style="font-size: 1.25rem;">\${escapeHtml(ins.cours.titre)}</h5>
+                            <h5 class="card-title fw-bold text-dark mb-1" style="font-size: 1.25rem;">\${escapeHtml(ins.titre)}</h5>
                             <div class="text-muted small" style="font-size: 0.8rem; letter-spacing: 0.5px;">
-                                PAR <span class="fw-bold text-secondary text-uppercase">\${escapeHtml(ins.cours.enseignant.username)}</span>
+                                PAR <span class="fw-bold text-secondary text-uppercase">\${escapeHtml(ins.enseignantUsername)}</span>
                             </div>
                         </div>
                         <p class="card-text text-muted small text-truncate mb-4">
-                            \${escapeHtml(ins.cours.description || '')}
+                            \${escapeHtml(ins.description || '')}
                         </p>
 
                         <div class="mt-auto">
@@ -152,7 +152,7 @@
                                      aria-valuemax="100">
                                 </div>
                             </div>
-                            <a href="/etudiant/cours/\${ins.cours.id}" class="btn btn-dark w-100 rounded-pill">
+                            <a href="/etudiant/cours/\${ins.coursId}" class="btn btn-dark w-100 rounded-pill">
                                 \${ins.progression === 0 ? 'Démarrer' : 'Continuer'}
                             </a>
                         </div>

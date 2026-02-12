@@ -398,83 +398,62 @@
             var response = await fetch('/api/inscriptions/etudiant/cours/' + courseId);
 
             if (response.ok) {
-                var inscription = await response.json();
-                inscriptionId = inscription.id;
-                renderCourse(inscription.cours, inscription, true);
-            } else if (response.status === 404) {
+                var data = await response.json();
+                inscriptionId = data.inscriptionId;
+                renderEnrolledDTO(data);
+            } 
+            else if (response.status === 404) {
                 var resCourse = await fetch('/api/cours/' + courseId);
-                if (resCourse.ok) {
-                    var course = await resCourse.json();
-                    renderCourse(course, null, false);
-                } else {
-                    throw new Error('Course not found');
-                }
-            } else {
-                throw new Error('Error loading inscription');
+
+                if (!resCourse.ok) throw new Error("Course not found");
+
+                var course = await resCourse.json();
+                renderLockedContent(course);
+            } 
+            else {
+                throw new Error("Erreur API");
             }
+
         } catch (e) {
             console.error(e);
             showError();
         }
     }
 
-    function renderCourse(course, inscription, isEnrolled) {
-        var teacher = course.enseignant;
-        var username = (teacher && teacher.username) ? teacher.username : 'Inconnu';
+    /* ===================== ENROLLED ===================== */
 
-        document.title = course.titre + (isEnrolled ? ' - FPL Academy' : ' - Aperçu');
-        document.getElementById('coursTitle').textContent = course.titre;
+    function renderEnrolledDTO(data) {
 
-        if (!isEnrolled) {
-            document.getElementById('coursTitle').classList.add('locked');
-        } else {
-            document.getElementById('coursTitle').classList.remove('locked');
-        }
+        document.title = data.coursTitre + " - FPL Academy";
+        document.getElementById("coursTitle").textContent = data.coursTitre;
+        document.getElementById("coursTitle").classList.remove("locked");
 
-        renderInstructor(username, isEnrolled);
+        renderInstructor(data.enseignantUsername, true);
 
-        if (isEnrolled) {
-            renderEnrolledContent(course, inscription);
-        } else {
-            renderLockedContent(course);
-        }
+        document.getElementById("coursContent").innerHTML =
+            '<p>' + escapeHtml(data.coursDescription || '') + '</p>';
+
+        renderProgress(data.progression || 0);
     }
 
-    function renderInstructor(username, isEnrolled) {
-        var initial = username.charAt(0).toUpperCase();
-        var instructorEl = document.getElementById('instructorInfo');
-        var badgeContainer = document.getElementById('instructorBadgeContainer');
+    function renderProgress(progress) {
 
-        instructorEl.innerHTML =
-            '<div class="instructor-avatar">' + initial + '</div>' +
-            '<div>' +
-            '<div class="instructor-name">' + escapeHtml(username) + '</div>' +
-            '<div class="instructor-title">Enseignant certifié</div>' +
-            '</div>';
-
-        if (isEnrolled) {
-            badgeContainer.innerHTML =
-                '<div class="badge-active">' +
-                '<i class="fas fa-circle"></i>' +
-                'Actif' +
-                '</div>';
-        } else {
-            badgeContainer.innerHTML = '';
-        }
-    }
-
-    function renderEnrolledContent(course, inscription) {
-        document.getElementById('coursContent').innerHTML = course.contenu || '<p class="text-muted">Aucun contenu disponible.</p>';
-
-        var progress = inscription.progression || 0;
         var isCompleted = progress === 100;
 
-        var valueClass = progress === 0 ? 'gray' : (progress === 100 ? 'green' : 'purple');
-        var fillClass = progress === 0 ? 'gray' : (progress === 100 ? 'green' : 'purple');
-        var statusIcon = progress === 100 ? 'circle-check' : (progress === 0 ? 'clock' : 'arrow-right');
-        var statusText = progress === 100 ? 'Terminé' : (progress === 0 ? 'Non commencé' : progress + '% complété');
+        var valueClass = progress === 0 ? 'gray'
+                        : (progress === 100 ? 'green' : 'purple');
 
-        var actions = '';
+        var fillClass = valueClass;
+
+        var statusIcon = progress === 100 ? 'circle-check'
+                        : (progress === 0 ? 'clock' : 'arrow-right');
+
+        var statusText = progress === 100
+            ? "Terminé"
+            : (progress === 0 ? "Non commencé" : progress + "% complété");
+
+        var actions = "";
+
         if (!isCompleted) {
             actions =
                 '<button class="btn-mark" onclick="updateProgress()">' +
@@ -489,7 +468,7 @@
                 '</div>';
         }
 
-        document.getElementById('progressContent').innerHTML =
+        document.getElementById("progressContent").innerHTML =
             '<div class="progress-value ' + valueClass + '">' + progress + '%</div>' +
             '<div class="progress-track">' +
             '<div class="progress-fill ' + fillClass + '" style="width: ' + progress + '%;"></div>' +
@@ -500,104 +479,116 @@
             '</div>' +
             actions;
 
-        document.getElementById('progressCard').style.display = 'block';
+        document.getElementById("progressCard").style.display = "block";
     }
+
+    /* ===================== LOCKED ===================== */
 
     function renderLockedContent(course) {
-        document.getElementById('progressCard').style.display = 'none';
 
-        var description = course.description ? escapeHtml(course.description) : 'Aucune description disponible.';
+        document.getElementById("coursTitle").textContent = course.titre;
+        document.getElementById("coursTitle").classList.add("locked");
 
-        // USING INLINE STYLES - 100% GUARANTEED TO WORK
-        var lockedHtml =
+        var teacher = course.enseignantUsername || "Inconnu";
+        renderInstructor(teacher, false);
+
+        document.getElementById("progressCard").style.display = "none";
+
+        var description = course.description
+            ? escapeHtml(course.description)
+            : "Aucune description disponible.";
+
+        document.getElementById("coursContent").innerHTML =
             '<div class="subscription-card">' +
-            '<div class="lock-icon">' +
-            '<i class="fas fa-lock"></i>' +
-            '</div>' +
+                '<div class="lock-icon">' +
+                    '<i class="fas fa-lock"></i>' +
+                '</div>' +
 
-            '<h3 class="subscription-title">Accès restreint</h3>' +
+                '<h3 class="subscription-title">Accès restreint</h3>' +
 
-            '<div style="display: inline-flex !important; align-items: center !important; gap: 0.5rem !important; background: #fef2f2 !important; border: 1px solid #fee2e2 !important; border-radius: 6px !important; padding: 0.5rem 1rem !important; margin-bottom: 1.5rem !important;">' +
-            '<i class="fas fa-circle-exclamation" style="color: #b91c1c !important; font-size: 0.8125rem !important;"></i>' +
-            '<span style="color: #b91c1c !important; font-size: 0.8125rem !important; font-weight: 500 !important;">Inscription requise</span>' +
-            '</div>' +
+                '<p class="subscription-description">' +
+                    'Vous devez vous inscrire pour accéder au contenu de ce cours.' +
+                '</p>' +
 
-            '<p class="subscription-description">' +
-            'Vous devez vous inscrire pour accéder au contenu de ce cours.' +
-            '</p>' +
+                '<button class="btn-enroll" onclick="enrollCourse()">' +
+                    '<i class="fas fa-graduation-cap"></i>' +
+                    'S\'inscrire au cours' +
+                '</button>' +
 
-            '<button class="btn-enroll" onclick="enrollCourse()">' +
-            '<i class="fas fa-graduation-cap"></i>' +
-            'S\'inscrire au cours' +
-            '</button>' +
-
-            '<div class="course-preview">' +
-            '<div class="preview-label">' +
-            '<i class="fas fa-file-lines"></i>' +
-            'À propos' +
-            '</div>' +
-            '<div class="preview-text">' + description + '</div>' +
-            '</div>' +
+                '<div class="course-preview">' +
+                    '<div class="preview-label">' +
+                        '<i class="fas fa-file-lines"></i>' +
+                        'À propos' +
+                    '</div>' +
+                    '<div class="preview-text">' + description + '</div>' +
+                '</div>' +
             '</div>';
-
-        document.getElementById('coursContent').innerHTML = lockedHtml;
     }
 
+    /* ===================== INSTRUCTOR ===================== */
+
+    function renderInstructor(username, isEnrolled) {
+
+        var initial = username.charAt(0).toUpperCase();
+
+        document.getElementById("instructorInfo").innerHTML =
+            '<div class="instructor-avatar">' + initial + '</div>' +
+            '<div>' +
+                '<div class="instructor-name">' + escapeHtml(username) + '</div>' +
+                '<div class="instructor-title">Enseignant certifié</div>' +
+            '</div>';
+
+        if (isEnrolled) {
+            document.getElementById("instructorBadgeContainer").innerHTML =
+                '<div class="badge-active">' +
+                    '<i class="fas fa-circle"></i>' +
+                    'Actif' +
+                '</div>';
+        } else {
+            document.getElementById("instructorBadgeContainer").innerHTML = '';
+        }
+    }
+
+    /* ===================== ACTIONS ===================== */
+
     async function updateProgress() {
-        var btn = document.querySelector('.btn-mark');
-        if (!btn) return;
-
-        var originalText = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mise à jour...';
-
         try {
             await fetch('/api/inscriptions/' + inscriptionId + '/progression', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ augmentation: 25 })
             });
+
             location.reload();
+
         } catch (e) {
-            console.error(e);
-            alert('Erreur lors de la mise à jour');
-            btn.disabled = false;
-            btn.innerHTML = originalText;
+            alert("Erreur mise à jour progression");
         }
     }
 
     async function enrollCourse() {
-        var btn = document.querySelector('.btn-enroll');
-        if (!btn) return;
-
-        var originalText = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inscription...';
-
         try {
             var res = await fetch('/api/inscriptions/inscrire/' + courseId, {
                 method: 'POST'
             });
 
-            if (res.ok) {
-                location.reload();
-            } else {
-                throw new Error('Échec de l\'inscription');
-            }
-        } catch(e) {
-            console.error(e);
-            alert('Erreur lors de l\'inscription');
-            btn.disabled = false;
-            btn.innerHTML = originalText;
+            if (!res.ok) throw new Error();
+
+            location.reload();
+
+        } catch (e) {
+            alert("Erreur lors de l'inscription");
         }
     }
 
+    /* ===================== ERROR ===================== */
+
     function showError() {
-        document.getElementById('coursContent').innerHTML =
+        document.getElementById("coursContent").innerHTML =
             '<div class="text-center py-5">' +
-            '<i class="fas fa-exclamation-circle" style="color: #94a3b8; font-size: 2.5rem; margin-bottom: 1rem;"></i>' +
-            '<h5 style="color: #475569;">Erreur de chargement</h5>' +
-            '<p style="color: #64748b;">Impossible de charger les détails du cours.</p>' +
+                '<i class="fas fa-exclamation-circle" style="font-size:2rem;color:#94a3b8;"></i>' +
+                '<h5 class="mt-3">Erreur de chargement</h5>' +
+                '<p>Impossible de charger les détails du cours.</p>' +
             '</div>';
     }
 
@@ -608,6 +599,7 @@
         return div.innerHTML;
     }
 </script>
+
 
 </body>
 </html>

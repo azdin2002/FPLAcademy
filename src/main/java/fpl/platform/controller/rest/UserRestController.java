@@ -1,33 +1,32 @@
 package fpl.platform.controller.rest;
 
+import fpl.platform.dto.RegisterUserRequest;
 import fpl.platform.model.User;
-import fpl.platform.service.AppService;
-import org.springframework.beans.factory.annotation.Autowired;
+import fpl.platform.service.UserService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserRestController {
 
-    @Autowired
-    private AppService appService;
+    private final UserService userService;
+
+    public UserRestController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/inscription")
-    public ResponseEntity<?> inscrireUtilisateur(@RequestBody User user) {
-        try {
-            appService.enregistrerUtilisateur(user);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Inscription réussie");
-            response.put("username", user.getUsername());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Erreur lors de l'inscription: " + e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        }
+    public ResponseEntity<User> inscrireUtilisateur(
+            @RequestBody RegisterUserRequest request) {
+
+        User user = userService.registerUser(
+                request.getUsername(),
+                request.getPassword(),
+                request.getRole()
+        );
+
+        return ResponseEntity.ok(user);
     }
 }

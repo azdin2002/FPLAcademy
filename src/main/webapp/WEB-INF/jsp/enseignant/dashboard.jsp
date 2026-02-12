@@ -203,7 +203,6 @@
 <%@ include file="../common/footer.jsp" %>
 
 <script>
-    // This function MUST exist in the global scope for the template literal to work
     function escapeHtml(text) {
         if (text === null || text === undefined) return '';
         const div = document.createElement('div');
@@ -214,6 +213,12 @@
     async function loadCours() {
         try {
             const response = await fetch('/api/enseignant/cours');
+
+            if (response.status === 401) {
+                window.location.href = '/connexion';
+                return;
+            }
+
             if (!response.ok) throw new Error('Failed to load courses');
 
             const courses = await response.json();
@@ -225,6 +230,7 @@
             } else if (urlParams.get('success') === 'deleted') {
                 showSuccessMessage('Cours supprimé avec succès !');
             }
+
         } catch (error) {
             console.error('Error loading courses:', error);
             showError();
@@ -238,31 +244,46 @@
         countElement.textContent = courses ? courses.length : 0;
 
         if (!courses || courses.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center py-5 text-muted">Vous n'avez pas encore publié de cours.</td></tr>`;
+            tbody.innerHTML =
+                `<tr>
+                    <td colspan="3" class="text-center py-5 text-muted">
+                        Vous n'avez pas encore publié de cours.
+                    </td>
+                 </tr>`;
             return;
         }
 
         tbody.innerHTML = courses.map(cours => {
-            const studentCount = cours.nbEtudiants || 0;
+
+            const studentCount = cours.nombreInscrits || 0;
             const studentText = studentCount <= 1 ? 'Étudiant' : 'Étudiants';
 
             return `
                 <tr onclick="window.location.href='/enseignant/cours/\${cours.id}'">
                     <td>
                         <div class="course-title">\${escapeHtml(cours.titre)}</div>
-                        <div class="small text-muted course-description-text">\${escapeHtml(cours.description) || 'Aucune description.'}</div>
+                        <div class="small text-muted">
+                            \${escapeHtml(cours.description) || 'Aucune description.'}
+                        </div>
                     </td>
                     <td class="text-center">
-                        <a href="/enseignant/cours/\${cours.id}/inscriptions" class="stat-badge" onclick="event.stopPropagation()">
-                            <i class="fas fa-user-friends"></i> \${studentCount} \${studentText}
+                        <a href="/enseignant/cours/\${cours.id}/inscriptions"
+                           class="stat-badge"
+                           onclick="event.stopPropagation()">
+                            <i class="fas fa-user-friends"></i>
+                            \${studentCount} \${studentText}
                         </a>
                     </td>
                     <td class="text-end">
-                        <div class="action-buttons" onclick="event.stopPropagation()">
-                            <a href="/enseignant/modifier/\${cours.id}" title="Modifier">
+                        <div class="action-buttons"
+                             onclick="event.stopPropagation()">
+                            <a href="/enseignant/modifier/\${cours.id}"
+                               title="Modifier">
                                 <i class="fas fa-pen"></i>
                             </a>
-                            <button class="btn-delete" onclick="deleteCours(\${cours.id})" title="Supprimer">
+                            <button class="btn-delete"
+                                    onclick="deleteCours(\${cours.id}, event)"
+                                    title="Supprimer">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
@@ -272,17 +293,24 @@
         }).join('');
     }
 
-    async function deleteCours(id) {
+    async function deleteCours(id, event) {
         event.stopPropagation();
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce cours ? Cette action est irréversible.')) return;
+
+        if (!confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')) return;
 
         try {
-            const response = await fetch(`/api/enseignant/cours/\${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/enseignant/cours/\${id}`, {
+                method: 'DELETE'
+            });
+
             if (!response.ok) throw new Error('Failed to delete course');
-            window.location.href = '/enseignant/dashboard?success=deleted';
+
+            window.location.href =
+                '/enseignant/dashboard?success=deleted';
+
         } catch (error) {
             console.error('Error deleting course:', error);
-            alert('Erreur lors de la suppression du cours.');
+            alert('Erreur lors de la suppression.');
         }
     }
 
@@ -290,14 +318,16 @@
         const msgDiv = document.getElementById('successMessage');
         msgDiv.textContent = message;
         msgDiv.style.display = 'block';
-        setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
+
+        setTimeout(() => {
+            msgDiv.style.display = 'none';
+        }, 4000);
     }
 
-    function showError() {
-        document.getElementById('coursTableBody').innerHTML = `<tr><td colspan="3" class="text-center py-5 text-danger">Erreur lors du chargement des cours.</td></tr>`;
-    }
+  
 
     document.addEventListener('DOMContentLoaded', loadCours);
 </script>
+
 </body>
 </html>

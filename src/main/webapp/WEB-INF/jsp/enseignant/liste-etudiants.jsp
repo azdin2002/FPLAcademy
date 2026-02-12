@@ -166,55 +166,53 @@
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="4" class="text-center py-5 text-muted">
-                            <i class="fas fa-user-friends fa-2x mb-3 opacity-25"></i><br>
-                            Aucun &eacute;tudiant n'est encore inscrit &agrave; ce cours.
+                            Aucun étudiant inscrit
                         </td>
                     </tr>`;
                 return;
             }
 
             tbody.innerHTML = inscriptions.map(i => {
-                const statusLabel = i.termine ? 'Termin\u00E9' : 'En cours';
+
+                const statusLabel = i.termine ? 'Terminé' : 'En cours';
                 const statusClass = i.termine ? 'status-complete' : 'status-ongoing';
                 const icon = i.termine ? 'fa-check-circle' : 'fa-clock';
-                
+
+                const dateFormatted = i.dateInscription
+                    ? new Date(i.dateInscription).toLocaleDateString('fr-FR')
+                    : '';
+
                 return `
                 <tr>
                     <td>
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                \${i.etudiant.username.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <div class="fw-bold text-dark">\${escapeHtml(i.etudiant.username)}</div>
-                                <div class="text-muted small" style="font-size: 0.7rem;">ID #\${i.etudiant.id}</div>
-                            </div>
-                        </div>
+                        <div class="fw-bold">\${i.username}</div>
+                        <div class="text-muted small">ID \#${i.userId}</div>
                     </td>
-                    <td style="width: 30%;">
-                        <div class="d-flex align-items-center">
-                            <div class="progress flex-grow-1 me-3">
-                                <div class="progress-bar" role="progressbar" style="width: \${i.progression}%"></div>
-                            </div>
-                            <span class="fw-bold small text-dark" style="min-width: 40px;">\${i.progression}%</span>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar" 
+                                 style="width: \${i.progression}%"></div>
                         </div>
                     </td>
                     <td class="text-center">
                         <span class="badge-status \${statusClass}">
-                            <i class="fas \${icon}"></i> \${statusLabel}
+                            <i class="fas \${icon}"></i> ${statusLabel}
                         </span>
                     </td>
                     <td class="text-end text-muted small">
-                        \${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        \${dateFormatted}
                     </td>
                 </tr>`;
             }).join("");
+
         } catch (e) {
-            document.getElementById("etudiantsBody").innerHTML = `
-                <tr><td colspan="4" class="text-center text-danger py-5">
-                <i class="fas fa-exclamation-triangle mb-2"></i><br>Erreur de chargement des donn&eacute;es</td></tr>`;
+            document.getElementById("etudiantsBody").innerHTML =
+                `<tr><td colspan="4" class="text-danger text-center">
+                    Erreur de chargement
+                 </td></tr>`;
         }
     }
+
 
     function escapeHtml(text) {
         if (!text) return '';

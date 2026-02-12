@@ -169,11 +169,17 @@
 </div>
 
 <%@ include file="../common/footer.jsp" %>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Extract ID safely
     const pathParts = window.location.pathname.split('/');
     const courseId = pathParts[pathParts.length - 1];
+
+    if (!courseId || isNaN(courseId)) {
+        alert("ID du cours invalide.");
+        return;
+    }
 
     async function loadCourse() {
         try {
@@ -182,24 +188,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const course = await response.json();
             populateForm(course);
+
         } catch (error) {
             console.error('Error loading course:', error);
+            alert("Impossible de charger le cours.");
         }
     }
 
     function populateForm(course) {
         document.getElementById('coursId').value = course.id;
-        document.getElementById('titre').value = course.titre;
+        document.getElementById('titre').value = course.titre || '';
         document.getElementById('description').value = course.description || '';
         document.getElementById('contenu').value = course.contenu || '';
-        document.getElementById('pageTitle').textContent = 'Modifier : ' + course.titre;
+        document.getElementById('pageTitle').textContent =
+            'Modifier : ' + (course.titre || '');
     }
 
     document.getElementById('modifierForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Traitement...';
+        submitBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2"></span> Enregistrement...';
 
         const formData = {
             titre: document.getElementById('titre').value,
@@ -210,21 +221,28 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`/api/enseignant/cours/\${courseId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(formData)
             });
 
             if (!response.ok) throw new Error();
+
+            // Redirect with success message
             window.location.href = '/enseignant/dashboard?success=updated';
+
         } catch (error) {
             alert('Erreur lors de la modification.');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Enregistrer les modifications';
+            submitBtn.innerHTML =
+                '<i class="fas fa-save me-2"></i>Enregistrer les modifications';
         }
     });
 
-    loadCourse(); 
+    loadCourse();
 });
 </script>
+
 </body>
 </html>

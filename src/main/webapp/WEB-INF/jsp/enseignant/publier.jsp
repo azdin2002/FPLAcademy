@@ -140,7 +140,17 @@
                                 <i class="fas fa-info-circle me-1"></i> Vous pouvez utiliser des balises HTML pour la mise en forme.
                             </div>
                         </div>
-
+						<div class="mb-4">
+						    <label class="form-label">Capacité maximale</label>
+						    <input type="number"
+						           id="capaciteMax"
+						           name="capaciteMax"
+						           class="form-control"
+						           min="1"
+						           placeholder="Ex: 30"
+						           required />
+						</div>
+						
                         <div class="d-flex justify-content-between align-items-center pt-4 border-top">
                             <a href="/enseignant/dashboard" class="btn-cancel">Annuler</a>
                             <button type="submit" class="btn btn-purple" id="submitBtn">
@@ -159,34 +169,48 @@
 <script>
     document.getElementById('coursForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Publication en cours...';
-        
+        submitBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin me-2"></i>Publication en cours...';
+
         const formData = {
-            titre: document.getElementById('titre').value,
-            description: document.getElementById('description').value,
-            contenu: document.getElementById('contenu').value
+            titre: document.getElementById('titre').value.trim(),
+            description: document.getElementById('description').value.trim(),
+            contenu: document.getElementById('contenu').value.trim(),
+            capaciteMax: parseInt(document.getElementById('capaciteMax').value)
         };
-        
+
         try {
             const response = await fetch('/api/enseignant/cours', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
-            
-            if (!response.ok) throw new Error('Failed to create course');
-            
-            window.location.href = '/enseignant/dashboard?success=created';
+
+            if (response.status === 400) {
+                const errorText = await response.text();
+                throw new Error(errorText);
+            }
+
+            if (!response.ok) {
+                throw new Error('Erreur serveur');
+            }
+
+            window.location.href =
+                '/enseignant/dashboard?success=created';
+
         } catch (error) {
             console.error('Error creating course:', error);
-            alert('Erreur lors de la publication. Veuillez r\u00E9essayer.');
+            alert("Erreur : " + error.message);
+
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Publier le cours';
+            submitBtn.innerHTML =
+                '<i class="fas fa-paper-plane me-2"></i>Publier le cours';
         }
     });
 </script>
+
 </body>
 </html>

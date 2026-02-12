@@ -1,16 +1,13 @@
 package fpl.platform.controller.rest;
 
+import fpl.platform.dto.InscriptionDTO;
+import fpl.platform.dto.InscriptionEtudiantDTO;
 import fpl.platform.model.Inscription;
-import fpl.platform.model.User;
-import fpl.platform.repository.InscriptionRepository;
-import fpl.platform.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import fpl.platform.service.InscriptionService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,39 +15,17 @@ import java.util.List;
 @RequestMapping("/api/etudiant")
 public class EtudiantRestController {
 
-    @Autowired
-    private InscriptionRepository inscriptionRepo;
+    private final InscriptionService inscriptionService;
 
-    @Autowired
-    private UserRepository userRepo;
+    public EtudiantRestController(InscriptionService inscriptionService) {
+        this.inscriptionService = inscriptionService;
+    }
 
     /**
      * Récupère la liste des cours auxquels l'étudiant connecté est inscrit.
-     * Utilisé par le Dashboard (dashboard.jsp)
      */
-    @GetMapping("/mes-cours")
-    public ResponseEntity<List<Inscription>> getMesCours(Authentication auth) {
-        // 1. Trouver l'utilisateur connecté en base
-        User etudiant = userRepo.findByUsername(auth.getName());
-        
-        // 2. Récupérer ses inscriptions via le repository
-        List<Inscription> inscriptions = inscriptionRepo.findByEtudiant(etudiant);
-        
-        return ResponseEntity.ok(inscriptions);
+    @GetMapping("/inscriptions/etudiant")
+    public List<InscriptionEtudiantDTO> getMesInscriptions(Authentication auth) {
+        return inscriptionService.getInscriptionsByEtudiant(auth.getName());
     }
-    
-//    @GetMapping("/cours/{id}")
-//    public ResponseEntity<Inscription> getCoursEtudiant(
-//            @PathVariable Long id,
-//            Authentication auth) {
-//
-//        User etudiant = userRepo.findByUsername(auth.getName());
-//
-//        Inscription inscription = inscriptionRepo
-//                .findByEtudiantIdAndCoursId(id, etudiant.getId())
-//                .orElseThrow(() -> new RuntimeException("Not enrolled"));
-//
-//        return ResponseEntity.ok(inscription);
-//    }
-
 }

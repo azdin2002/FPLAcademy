@@ -121,14 +121,13 @@
 <script>
 async function loadCatalogue() {
     try {
-        console.log("📡 load catalogue");
-
         const resCours = await fetch('/api/cours');
-        if (!resCours.ok) throw new Error('Failed to fetch courses');
-        const courses = await resCours.json();
+        if (!resCours.ok) throw new Error();
+        const coursesPage = await resCours.json();
+        const courses = coursesPage.content; // 🔥 VERY IMPORTANT
 
         const resInsc = await fetch('/api/inscriptions/etudiant');
-        if (!resInsc.ok) throw new Error('Failed to fetch inscriptions');
+        if (!resInsc.ok) throw new Error();
         const inscriptions = await resInsc.json();
 
         displayCourses(courses, inscriptions);
@@ -141,108 +140,100 @@ async function loadCatalogue() {
 }
 
 function displayCourses(courses, inscriptions) {
+
     const container = document.getElementById('catalogueContainer');
     const countElement = document.getElementById('coursesCount');
 
-    console.log("Courses received:", courses); // DEBUG
     countElement.textContent = courses.length;
-
-    let html = '';
 
     if (courses.length === 0) {
         container.innerHTML = `
             <div class="col-12 text-center py-5">
                 <div class="display-1 text-muted">📚</div>
-                <h4 class="text-muted mt-3">Aucun cours disponible pour le moment.</h4>
+                <h4 class="text-muted mt-3">Aucun cours disponible.</h4>
             </div>
         `;
         return;
     }
 
+    let html = '';
+
     courses.forEach(course => {
-        try {
-            const inscription = inscriptions.find(i => i.cours.id === course.id);
-            const isEnrolled = !!inscription;
-            const courseUrl = '/etudiant/cours/' + course.id;
 
-            html += `
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card course-card h-100">
-                        <div class="card-body d-flex flex-column">
-                            <div class="mb-3">
-                                <a href="\${courseUrl}" class="course-link">
-                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-size: 1.25rem;">\${escapeHtml(course.titre)}</h5>
-                                </a>
-                                <div class="text-muted small" style="font-size: 0.8rem; letter-spacing: 0.5px;">
-                                    PAR <span class="fw-bold text-secondary text-uppercase">\${escapeHtml(course.enseignant ? course.enseignant.username : 'Inconnu')}</span>
-                                </div>
-                            </div>
-                            <p class="card-text text-muted small text-truncate mb-4">
-                                \${escapeHtml(course.description)}
-                            </p>
+        const inscription = inscriptions.find(i => i.coursId === course.id);
+        const isEnrolled = !!inscription;
 
-                            <div class="mt-auto">
-                                \${isEnrolled ?
-                                    `<button class="btn btn-unsubscribe" onclick="unsubscribe(\${inscription.id})">Se désinscrire</button>` :
-                                    `<button class="btn btn-primary-custom" onclick="enrollCourse(\${course.id})" id="btn-\${course.id}">S'inscrire</button>`
-                                }
+        html += `
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card course-card h-100">
+                    <div class="card-body d-flex flex-column">
+
+                        <div class="mb-3">
+                            <h5 class="fw-bold">\${escapeHtml(course.coursTitre)}</h5>
+                            <div class="text-muted small">
+                                PAR <strong>\${escapeHtml(course.enseignantUsername)}</strong>
                             </div>
                         </div>
+
+                        <p class="text-muted small mb-4">
+                            \${escapeHtml(course.description || '')}
+                        </p>
+
+                        <div class="mt-auto">
+
+                            \${isEnrolled ? `
+                                <button class="btn btn-unsubscribe"
+                                        onclick="unsubscribe(\${course.id})">
+                                        Se désinscrire
+                                </button>
+                            ` : `
+                                <button class="btn btn-primary-custom"
+                                        onclick="enrollCourse(\${course.id})">
+                                        S'inscrire
+                                </button>
+                            `}
+
+                        </div>
+
                     </div>
                 </div>
-            `;
-        } catch (e) {
-            console.error("Error processing course:", course, e);
-        }
+            </div>
+        `;
     });
 
     container.innerHTML = html;
 }
 
 async function enrollCourse(id) {
-    const btn = document.getElementById('btn-' + id);
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Traitement...';
 
     const res = await fetch('/api/inscriptions/inscrire/' + id, {
         method: 'POST'
     });
 
     if (res.ok) {
-        window.location.href = '/etudiant/dashboard';
+        loadCatalogue();
     } else {
-        alert('Erreur lors de l\'inscription');
-        btn.disabled = false;
-        btn.textContent = "S'inscrire";
+        alert("Erreur lors de l'inscription");
     }
 }
 
-async function unsubscribe(inscriptionId) {
-    if (!confirm("Êtes-vous sûr de vouloir vous désinscrire de ce cours ?")) {
-        return;
-    }
+async function unsubscribe(coursId) {
 
-    try {
-        const res = await fetch('/api/inscriptions/' + inscriptionId, {
-            method: 'DELETE'
-        });
+    if (!confirm("Se désinscrire ?")) return;
 
-        if (res.ok) {
-            // Reload to refresh the list and status
-            loadCatalogue();
-        } else {
-            alert("Erreur lors de la désinscription.");
-        }
-    } catch (e) {
-        console.error(e);
-        alert("Erreur lors de la désinscription.");
+    const res = await fetch('/api/inscriptions/desinscrire/' + coursId, {
+        method: 'DELETE'
+    });
+
+    if (res.ok) {
+        loadCatalogue();
+    } else {
+        alert("Erreur lors de la désinscription");
     }
 }
 
 function escapeHtml(text) {
-    if (text === null || text === undefined) {
-        return '';
-    }
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
@@ -250,6 +241,7 @@ function escapeHtml(text) {
 
 document.addEventListener('DOMContentLoaded', loadCatalogue);
 </script>
+
 
 </body>
 </html>

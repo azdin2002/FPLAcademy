@@ -1,31 +1,30 @@
 package fpl.platform.controller.rest;
 
-import fpl.platform.model.Cours;
-import fpl.platform.repository.CoursRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import fpl.platform.dto.CoursResponse;
+import fpl.platform.service.CoursService;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/cours")
 public class CoursRestController {
 
-    @Autowired
-    private CoursRepository coursRepo;
+    private final CoursService coursService;
+
+    public CoursRestController(CoursService coursService) {
+        this.coursService = coursService;
+    }
 
     @GetMapping
-    public List<Cours> getListeCours() {
-        return coursRepo.findAll();
+    public ResponseEntity<Page<CoursResponse>> getListeCours(Pageable pageable) {
+        return ResponseEntity.ok(coursService.getAllCours(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Cours> getCoursById(@PathVariable Long id) {
-        return coursRepo.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<CoursResponse> getCoursById(@PathVariable Long id) {
+        return ResponseEntity.ok(coursService.getCoursById(id));
     }
-    
-
 }
