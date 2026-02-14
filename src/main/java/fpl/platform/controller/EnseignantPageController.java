@@ -35,10 +35,15 @@ public class EnseignantPageController {
     public String voirEtudiants(@PathVariable Long id) {
         return "enseignant/liste-etudiants";
     }
-    
+
     @GetMapping("/cours/{id}/inscriptions")
     public String inscriptionsPage(@PathVariable Long id, Model model) {
         model.addAttribute("coursId", id);
         return "enseignant/liste-etudiants";
+    }
+    
+    @GetMapping("/catalogue")
+    public String catalogue() {
+        return "enseignant/catalogue";
     }
 }

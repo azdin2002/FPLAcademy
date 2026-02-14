@@ -334,6 +334,25 @@
                 width: fit-content;
             }
         }
+
+        .btn-header-unsubscribe {
+            background-color: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-header-unsubscribe:hover {
+            background-color: #b91c1c;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -342,10 +361,17 @@
 
 <div class="main-content">
     <div class="course-container">
-        <a class="back-link" href="/etudiant/dashboard">
-            <i class="fas fa-arrow-left"></i>
-            Retour au dashboard
-        </a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a class="back-link mb-0" href="/etudiant/dashboard">
+                <i class="fas fa-arrow-left"></i>
+                Retour au dashboard
+            </a>
+            <div id="actionsContainer" style="display: none;">
+                <button id="unsubscribeBtn" class="btn-header-unsubscribe">
+                    <i class="fas fa-user-minus"></i> Se désinscrire
+                </button>
+            </div>
+        </div>
 
         <div class="row g-4">
             <div class="col-lg-8">
@@ -435,6 +461,10 @@
 
         if (isEnrolled) {
             renderEnrolledContent(course, inscription);
+            // Show unsubscribe button in header
+            const actionsContainer = document.getElementById('actionsContainer');
+            actionsContainer.style.display = 'block';
+            document.getElementById('unsubscribeBtn').onclick = () => unsubscribeCourse(inscription.id);
         } else {
             renderLockedContent(course);
         }
@@ -589,6 +619,27 @@
             alert('Erreur lors de l\'inscription');
             btn.disabled = false;
             btn.innerHTML = originalText;
+        }
+    }
+
+    async function unsubscribeCourse(id) {
+        if (!confirm("Êtes-vous sûr de vouloir vous désinscrire de ce cours ?")) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/inscriptions/' + id, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                window.location.href = '/etudiant/dashboard'; // Redirect to dashboard after unsubscribe
+            } else {
+                alert("Erreur lors de la désinscription.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erreur lors de la désinscription.");
         }
     }
 

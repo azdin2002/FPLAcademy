@@ -130,6 +130,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/enseignant/dashboard">Dashboard</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/enseignant/catalogue">Catalogue</a>
+                    </li>
                 </sec:authorize>
             </ul>
         </div>
