@@ -109,7 +109,16 @@
         </div>
     </div>
 
-    <hr class="mb-5" style="border-top: 1px solid #e9ecef; opacity: 1;">
+    <hr class="mb-4" style="border-top: 1px solid #e9ecef; opacity: 1;">
+
+    <div class="row mb-4 justify-content-end">
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" class="form-control" id="courseSearch" placeholder="Rechercher un cours...">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+            </div>
+        </div>
+    </div>
 
     <div class="row mb-5" id="catalogueContainer">
         <!-- JS will populate this -->
@@ -119,6 +128,10 @@
 <%@ include file="../common/footer.jsp" %>
 
 <script>
+// Global variables to store original data
+let allCoursesData = [];
+let allInscriptionsData = [];
+
 async function loadCatalogue() {
     try {
         const resCours = await fetch('/api/cours');
@@ -130,7 +143,12 @@ async function loadCatalogue() {
         if (!resInsc.ok) throw new Error();
         const inscriptions = await resInsc.json();
 
-        displayCourses(courses, inscriptions);
+        allCoursesData = courses;
+        allInscriptionsData = inscriptions;
+
+        document.getElementById('coursesCount').textContent = allCoursesData.length;
+
+        displayCourses(allCoursesData, allInscriptionsData);
 
     } catch (e) {
         console.error(e);
@@ -139,39 +157,40 @@ async function loadCatalogue() {
     }
 }
 
-function displayCourses(courses, inscriptions) {
-
+function displayCourses(coursesToDisplay, inscriptions) {
     const container = document.getElementById('catalogueContainer');
-    const countElement = document.getElementById('coursesCount');
-
-    countElement.textContent = courses.length;
-
-    if (courses.length === 0) {
-        container.innerHTML = `
-            <div class="col-12 text-center py-5">
-                <div class="display-1 text-muted">📚</div>
-                <h4 class="text-muted mt-3">Aucun cours disponible.</h4>
-            </div>
-        `;
-        return;
-    }
 
     let html = '';
 
-    courses.forEach(course => {
+    if (coursesToDisplay.length === 0) {
+        html = `<div class="col-12 text-center py-5"><h4 class="text-muted">Aucun cours trouvé.</h4></div>`;
+    } else {
+        coursesToDisplay.forEach(course => {
+            const inscription = inscriptions.find(i => i.cours.id === course.id);
+            const isEnrolled = !!inscription;
+            const courseUrl = '/etudiant/cours/' + course.id;
 
-        const inscription = inscriptions.find(i => i.coursId === course.id);
-        const isEnrolled = !!inscription;
+            html += `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card course-card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-3">
+                                <a href="\${courseUrl}" class="course-link">
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-size: 1.25rem;">\${escapeHtml(course.titre)}</h5>
+                                </a>
+                                <div class="text-muted small" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                                    PAR <span class="fw-bold text-secondary text-uppercase">\${escapeHtml(course.enseignant ? course.enseignant.username : 'Inconnu')}</span>
+                                </div>
+                            </div>
+                            <p class="card-text text-muted small text-truncate mb-4">
+                                \${escapeHtml(course.description)}
+                            </p>
 
-        html += `
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card course-card h-100">
-                    <div class="card-body d-flex flex-column">
-
-                        <div class="mb-3">
-                            <h5 class="fw-bold">\${escapeHtml(course.coursTitre)}</h5>
-                            <div class="text-muted small">
-                                PAR <strong>\${escapeHtml(course.enseignantUsername)}</strong>
+                            <div class="mt-auto">
+                                \${isEnrolled ?
+                                    `<button class="btn btn-unsubscribe" onclick="unsubscribe(\${inscription.id})">Se désinscrire</button>` :
+                                    `<button class="btn btn-primary-custom" onclick="enrollCourse(\${course.id})" id="btn-\${course.id}">S'inscrire</button>`
+                                }
                             </div>
                         </div>
 
@@ -197,18 +216,16 @@ function displayCourses(courses, inscriptions) {
 
                     </div>
                 </div>
-            </div>
-        `;
-    });
+            `;
+        });
+    }
 
     container.innerHTML = html;
 }
 
 async function enrollCourse(id) {
 
-    const res = await fetch('/api/inscriptions/inscrire/' + id, {
-        method: 'POST'
-    });
+    const res = await fetch('/api/inscriptions/inscrire/' + id, { method: 'POST' });
 
     if (res.ok) {
         loadCatalogue();
@@ -217,29 +234,49 @@ async function enrollCourse(id) {
     }
 }
 
-async function unsubscribe(coursId) {
+async function unsubscribe(inscriptionId) {
+    if (!confirm("Êtes-vous sûr de vouloir vous désinscrire de ce cours ?")) return;
 
-    if (!confirm("Se désinscrire ?")) return;
-
-    const res = await fetch('/api/inscriptions/desinscrire/' + coursId, {
-        method: 'DELETE'
-    });
-
-    if (res.ok) {
-        loadCatalogue();
-    } else {
-        alert("Erreur lors de la désinscription");
+    try {
+        const res = await fetch('/api/inscriptions/' + inscriptionId, { method: 'DELETE' });
+        if (res.ok) {
+            loadCatalogue();
+        } else {
+            alert("Erreur lors de la désinscription.");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Erreur lors de la désinscription.");
     }
 }
 
 function escapeHtml(text) {
-    if (!text) return '';
+    if (text === null || text === undefined) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-document.addEventListener('DOMContentLoaded', loadCatalogue);
+document.addEventListener('DOMContentLoaded', () => {
+    loadCatalogue();
+
+    const courseSearchInput = document.getElementById('courseSearch');
+    if (courseSearchInput) {
+        courseSearchInput.addEventListener('input', (event) => {
+            const searchTerm = event.target.value.toLowerCase();
+            const filteredCourses = allCoursesData.filter(course => {
+                const title = course.titre ? course.titre.toLowerCase() : '';
+                const description = course.description ? course.description.toLowerCase() : '';
+                const instructor = course.enseignant && course.enseignant.username ? course.enseignant.username.toLowerCase() : '';
+
+                return title.includes(searchTerm) ||
+                       description.includes(searchTerm) ||
+                       instructor.includes(searchTerm);
+            });
+            displayCourses(filteredCourses, allInscriptionsData);
+        });
+    }
+});
 </script>
 
 

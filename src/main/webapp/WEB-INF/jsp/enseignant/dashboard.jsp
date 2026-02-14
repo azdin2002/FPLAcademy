@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa; /* Unified Light background */
+            background-color: #f8f9fa;
             color: #212529;
             display: flex;
             flex-direction: column;
@@ -32,50 +32,87 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(118, 75, 162, 0.2);
         }
-        
-        /* --- Updated Header Button to match stat-badge style --- */
-			.btn-new-course {
-			    background-color: rgba(118, 75, 162, 0.08); /* Light purple tint */
-			    color: #764ba2; /* Dark purple text */
-			    border: 1px solid rgba(118, 75, 162, 0.1); /* Subtle border */
-			    font-weight: 600;
-			    padding: 10px 24px;
-			    border-radius: 25px;
-			    transition: all 0.2s ease;
-			    text-decoration: none;
-			    display: inline-flex;
-			    align-items: center;
-			    gap: 8px;
-			}
-			
-			.btn-new-course:hover {
-			    background-color: #764ba2; /* Switches to solid purple on hover */
-			    color: white;
-			    transform: translateY(-2px);
-			    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.2);
-			}
 
-        /* --- Table Container (Matches Student Cards) --- */
+        /* --- Nouveau Cours Button --- */
+        .btn-new-course {
+            background-color: #764ba2;
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 25px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-new-course:hover {
+            background-color: #61398a;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.2);
+        }
+
+        /* --- Stats Card - Fixed alignment --- */
+        .stats-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 24px;
+        }
+
+        .stats-block {
+            display: flex;
+            align-items: baseline;
+            background: white;
+            padding: 8px 20px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #764ba2;
+            line-height: 1;
+            margin-right: 8px;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        /* --- Table Container --- */
         .table-container {
             background-color: #ffffff;
             border: 1px solid #e9ecef;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 0 2rem;
         }
 
         /* --- Unified Table Styling --- */
-        .table { margin-bottom: 0; }
-        
+        .table {
+            margin-bottom: 0;
+            width: 100%;
+        }
+
         .table thead th {
-            background-color: #ffffff; 
+            background-color: #ffffff;
             color: #6c757d;
             border-bottom: 1px solid #e9ecef;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.75rem;
             letter-spacing: 1px;
-            padding: 1.2rem 1.5rem;
+            padding: 1.2rem 0;
         }
 
         .table tbody tr {
@@ -84,13 +121,13 @@
         }
 
         .table tbody tr:hover {
-            background-color: #fcfaff; /* Subtle purple-tinted hover */
+            background-color: #fcfaff;
         }
 
         .table td {
             border-top: 1px solid #e9ecef;
             vertical-align: middle;
-            padding: 1.5rem;
+            padding: 1.5rem 0;
         }
 
         /* --- Content Styling --- */
@@ -100,8 +137,8 @@
             font-size: 1.1rem;
             margin-bottom: 0.2rem;
         }
-        
-        .course-desc {
+
+        .course-description-text {
             color: #6c757d;
             font-size: 0.85rem;
             max-width: 400px;
@@ -142,19 +179,29 @@
         .action-buttons a:hover { color: #764ba2; }
         .action-buttons .btn-delete:hover { color: #dc3545; }
 
-        /* Unified Stats Header */
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 800;
-            color: #764ba2;
-            line-height: 1;
+        .divider {
+            border-top: 1px solid #e9ecef;
+            opacity: 1;
+            margin: 2rem 0;
         }
-        .stat-label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #6c757d;
-            font-weight: 600;
+
+        @media (max-width: 768px) {
+            .stats-wrapper {
+                flex-direction: column-reverse;
+                align-items: flex-end;
+                gap: 12px;
+                margin-top: 1rem;
+            }
+
+            .btn-new-course {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats-block {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -163,39 +210,42 @@
 <%@ include file="../common/header.jsp" %>
 
 <div class="container mt-5 main-content">
-    <div class="row mb-4 align-items-end">
-        <div class="col-md-8">
+    <!-- Header with better aligned elements -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
             <h2 class="fw-bold text-dark mb-2">Tableau de bord Enseignant</h2>
-            <p class="text-muted lead mb-0" style="font-size: 1.1rem;">
-                G&eacute;rez vos contenus et suivez la progression de vos &eacute;tudiants.
+            <p class="text-muted mb-0" style="font-size: 1rem;">
+                Gérez vos contenus et suivez la progression de vos étudiants.
             </p>
         </div>
-        <div class="col-md-4 text-md-end mt-4 mt-md-0">
-             <div class="d-inline-block text-end me-4">
-                <div class="stat-number" id="totalCourses">0</div>
-                <div class="stat-label">Cours Publi&eacute;s</div>
-             </div>
-             <a href="/enseignant/publier" class="btn-new-course shadow-sm">
-    			<i class="fas fa-plus"></i> Nouveau Cours
-			</a>
+        <div class="col-md-6 mt-4 mt-md-0">
+            <div class="stats-wrapper">
+                <a href="/enseignant/publier" class="btn-new-course">
+                    <i class="fas fa-plus"></i> Nouveau Cours
+                </a>
+                <div class="stats-block">
+                    <span class="stat-number" id="totalCourses">0</span>
+                    <span class="stat-label">Cours Publiés</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <hr class="mb-5" style="border-top: 1px solid #e9ecef; opacity: 1;">
+    <hr class="divider">
 
     <div id="successMessage" class="alert alert-success border-0 shadow-sm mb-4" style="display:none; background-color: #d1e7dd; color: #0f5132;"></div>
 
     <div class="table-container mb-5">
         <table class="table">
             <thead>
-                <tr>
-                    <th>D&eacute;tails du Cours</th>
-                    <th class="text-center">Communaut&eacute;</th>
-                    <th class="text-end">Gestion</th>
-                </tr>
+            <tr>
+                <th>Détails du Cours</th>
+                <th class="text-center">Communauté</th>
+                <th class="text-end">Gestion</th>
+            </tr>
             </thead>
             <tbody id="coursTableBody">
-                </tbody>
+            </tbody>
         </table>
     </div>
 </div>
@@ -262,9 +312,7 @@
                 <tr onclick="window.location.href='/enseignant/cours/\${cours.id}'">
                     <td>
                         <div class="course-title">\${escapeHtml(cours.titre)}</div>
-                        <div class="small text-muted">
-                            \${escapeHtml(cours.description) || 'Aucune description.'}
-                        </div>
+                        <div class="course-description-text">\${escapeHtml(cours.description) || 'Aucune description.'}</div>
                     </td>
                     <td class="text-center">
                         <a href="/enseignant/cours/\${cours.id}/inscriptions"

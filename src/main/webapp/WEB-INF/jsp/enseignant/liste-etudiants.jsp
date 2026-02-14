@@ -3,110 +3,293 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Liste des &eacute;tudiants - FPL Academy</title>
+    <title>Liste des étudiants - FPL Academy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa; /* Unified Light background */
+            background-color: #f8f9fa;
             color: #212529;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
-        .main-content { flex: 1; padding-bottom: 3rem; }
+        .main-content {
+            flex: 1;
+            padding-bottom: 4rem;
+        }
 
-        /* --- Return Button Style (Matches stat-badge) --- */
+        /* --- RETURN BUTTON - LEFT --- */
         .btn-return {
             background-color: rgba(118, 75, 162, 0.08);
             color: #764ba2;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 100px;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
+            gap: 10px;
+            font-size: 0.9rem;
             border: 1px solid rgba(118, 75, 162, 0.1);
+            margin-bottom: 2rem;
         }
         .btn-return:hover {
             background-color: #764ba2;
             color: white;
             transform: translateX(-5px);
         }
+        .btn-return i {
+            color: #764ba2;
+            font-size: 0.8rem;
+        }
+        .btn-return:hover i {
+            color: white;
+        }
 
-        /* --- Header Section --- */
+        /* --- HEADER --- */
         .page-header {
             margin-bottom: 2rem;
         }
 
-        /* --- Table Container (Matches Dashboard Cards) --- */
-        .card-premium {
-            background-color: #ffffff;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        .page-title {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        /* --- TABLE - SIMPLE MODERN --- */
+        .table-wrapper {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #d0d6e2;
             overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
-        /* --- Unified Table Styling --- */
-        .table { margin-bottom: 0; }
-        
+        .table {
+            margin-bottom: 0;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
         .table thead th {
-            background-color: #ffffff;
-            color: #6c757d;
-            border-bottom: 1px solid #e9ecef;
+            background: white;
+            color: #475569;
             font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            padding: 1.25rem 1.5rem;
+            padding: 1.25rem 2rem; /* 32px left and right */
+            border-bottom: 1px solid #d0d6e2;
+            white-space: nowrap;
         }
 
-        .table td { 
-            padding: 1.25rem 1.5rem; 
-            border-top: 1px solid #f1f3f5;
+        .table td {
+            padding: 1rem 2rem !important; /*  32px left and right - NOT STICKING TO EDGE */
+            border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
+            font-size: 0.95rem;
+            margin:0;
+            color: #1e293b;
+
         }
 
-        .table-hover tbody tr:hover { 
-            background-color: #fcfaff; /* Subtle purple tint */
+        .table tbody tr:last-child td {
+            border-bottom: none;
         }
 
-        /* --- Progress Bar --- */
-        .progress { 
-            height: 8px; 
-            background-color: #e9ecef; 
-            border-radius: 10px; 
-        }
-        .progress-bar { 
-            border-radius: 10px; 
-            background-color: #764ba2;
+        .table tbody tr {
+            transition: background-color 0.15s ease;
         }
 
-        /* --- Badges --- */
-        .badge-status {
-            padding: 6px 12px;
-            border-radius: 20px;
+        .table tbody tr:hover {
+            background-color: #faf9ff;
+        }
+
+        /* --- SIMPLE USER AVATAR - PURPLE BACKGROUND, WHITE LETTER --- */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #dfd4f8; /* Simple solid purple */
+            color: #6b46c1;
             font-weight: 600;
-            font-size: 0.75rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%; /* Slightly rounded corners */
+            flex-shrink: 0;
+        }
+
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .student-id {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        /* --- PROGRESS - PURPLE --- */
+        .progress-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 200px;
+        }
+
+        .progress {
+            flex: 1;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 100px;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #6b46c1  !important; /* Simple solid purple */
+            border-radius: 100px;
+            transition: width 0.2s ease;
+        }
+
+        .progress-value {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 0.85rem;
+            min-width: 45px;
+        }
+
+        /* --- STATUS BADGE - SIMPLE --- */
+        .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            white-space: nowrap;
         }
-        .status-complete { background: rgba(25, 135, 84, 0.1); color: #198754; }
-        .status-ongoing { background: rgba(118, 75, 162, 0.1); color: #764ba2; }
 
-        /* --- Avatar --- */
-        .avatar-circle {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 700;
-            border-radius: 10px; /* Modern rounded-square look */
+        .status-badge i {
+            font-size: 0.7rem;
+        }
+
+        .status-ongoing {
+            background: #f8f5ff;
+            color: #6b46c1;
+        }
+
+        .status-completed {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        /* --- DATE CELL --- */
+        .date-cell {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* --- EMPTY STATE --- */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h4 {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+        }
+
+        .empty-state p {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        /* --- ERROR STATE --- */
+        .error-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .error-state i {
+            font-size: 2rem;
+            color: #dc2626;
+            margin-bottom: 0.75rem;
+        }
+
+        .error-state h4 {
+            font-weight: 600;
+            color: #b91c1c;
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .error-state p {
+            color: #b91c1c;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 992px) {
+            .table thead th {
+                padding: 1rem 1.5rem;
+            }
+
+            .table td {
+                padding: 1rem 1.5rem;
+            }
+
+            .progress-cell {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                min-width: auto;
+            }
+
+            .progress {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -115,38 +298,47 @@
 <%@ include file="../common/header.jsp" %>
 
 <div class="container mt-5 main-content">
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-7">
-            <h2 class="fw-bold text-dark mb-1">&Eacute;tudiants Inscrits</h2>
-            <p class="text-muted mb-0">Suivi d&eacute;taill&eacute; de la progression de vos apprenants.</p>
-        </div>
-        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+    <!-- RETURN BUTTON - LEFT -->
+    <div class="row">
+        <div class="col-12">
             <a href="/enseignant/dashboard" class="btn-return">
-                <i class="fas fa-arrow-left"></i> Retour au Dashboard
+                <i class="fas fa-arrow-left"></i>
+                Retour au Dashboard
             </a>
         </div>
     </div>
 
-    <div class="card card-premium">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                <tr>
-                    <th>&Eacute;tudiant</th>
-                    <th>Progression</th>
-                    <th class="text-center">Statut</th>
-                    <th class="text-end">Date d'inscription</th>
-                </tr>
-                </thead>
-                <tbody id="etudiantsBody">
-                    <tr>
-                        <td colspan="4" class="text-center py-5">
-                            <div class="spinner-border text-primary opacity-25" role="status"></div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- HEADER -->
+    <div class="row page-header">
+        <div class="col-12">
+            <h1 class="page-title">Étudiants inscrits</h1>
+            <p class="page-subtitle">Suivi de la progression de vos apprenants</p>
         </div>
+    </div>
+
+    <!-- TABLE - PROPER SPACING LEFT AND RIGHT -->
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Étudiant</th>
+                <th>Progression</th>
+                <th class="text-center">Statut</th>
+                <th class="text-end">Inscription</th>
+            </tr>
+            </thead>
+            <tbody id="etudiantsBody">
+            <tr>
+                <td colspan="4" style="padding: 0;">
+                    <div class="text-center py-5">
+                        <div class="spinner-border" style="color: #6b46c1; width: 2.5rem; height: 2.5rem;" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -165,51 +357,78 @@
             if (inscriptions.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">
-                            Aucun étudiant inscrit
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <i class="fas fa-user-graduate"></i>
+                                <h4>Aucun étudiant inscrit</h4>
+                                <p>Ce cours n'a pas encore d'apprenants</p>
+                            </div>
                         </td>
                     </tr>`;
                 return;
             }
 
             tbody.innerHTML = inscriptions.map(i => {
-
                 const statusLabel = i.termine ? 'Terminé' : 'En cours';
-                const statusClass = i.termine ? 'status-complete' : 'status-ongoing';
-                const icon = i.termine ? 'fa-check-circle' : 'fa-clock';
+                const statusClass = i.termine ? 'status-completed' : 'status-ongoing';
+                const icon = i.termine ? 'fa-circle-check' : 'fa-clock';
 
-                const dateFormatted = i.dateInscription
-                    ? new Date(i.dateInscription).toLocaleDateString('fr-FR')
-                    : '';
+                const date = i.dateInscription ? new Date(i.dateInscription) : new Date();
+                const formattedDate = date.toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
 
                 return `
-                <tr>
-                    <td>
-                        <div class="fw-bold">\${i.username}</div>
-                        <div class="text-muted small">ID \#${i.userId}</div>
-                    </td>
-                    <td>
-                        <div class="progress">
-                            <div class="progress-bar" 
-                                 style="width: \${i.progression}%"></div>
-                        </div>
-                    </td>
-                    <td class="text-center">
-                        <span class="badge-status \${statusClass}">
-                            <i class="fas \${icon}"></i> ${statusLabel}
-                        </span>
-                    </td>
-                    <td class="text-end text-muted small">
-                        \${dateFormatted}
-                    </td>
-                </tr>`;
+                    <tr>
+                        <td>
+                            <div class="student-cell">
+                                <div class="user-avatar">
+                                    \${i.etudiant.username.charAt(0).toUpperCase()}
+                                </div>
+                                <div class="student-info">
+                                    <span class="student-name">\${escapeHtml(i.etudiant.username)}</span>
+                                    <span class="student-id">ID \${i.etudiant.id}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="progress-cell">
+                                <div class="progress">
+                                    <div class="progress-bar"
+                                         role="progressbar"
+                                         style="width: \${i.progression}%">
+                                    </div>
+                                </div>
+                                <span class="progress-value">\${i.progression}%</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="status-badge \${statusClass}">
+                                <i class="fas \${icon}"></i>
+                                \${statusLabel}
+                            </span>
+                        </td>
+                        <td class="text-end date-cell">
+                            \${formattedDate}
+                        </td>
+                    </tr>
+                `;
             }).join("");
 
         } catch (e) {
-            document.getElementById("etudiantsBody").innerHTML =
-                `<tr><td colspan="4" class="text-danger text-center">
-                    Erreur de chargement
-                 </td></tr>`;
+            console.error(e);
+            document.getElementById("etudiantsBody").innerHTML = `
+                <tr>
+                    <td colspan="4">
+                        <div class="error-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>Erreur de chargement</h4>
+                            <p>Impossible de charger les inscriptions</p>
+                        </div>
+                    </td>
+                </tr>`;
         }
     }
 
