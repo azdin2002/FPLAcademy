@@ -1,7 +1,7 @@
 package fpl.platform.controller.rest;
 
 import fpl.platform.model.Cours;
-import fpl.platform.repository.CoursRepository;
+import fpl.platform.service.CoursService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,16 +13,16 @@ import java.util.List;
 public class CoursRestController {
 
     @Autowired
-    private CoursRepository coursRepo;
+    private CoursService coursService;
 
     @GetMapping
     public List<Cours> getListeCours() {
-        return coursRepo.findAll();
+        return coursService.getAllCours();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Cours> getCoursById(@PathVariable Long id) {
-        return coursRepo.findById(id)
+        return coursService.getCoursById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

@@ -225,78 +225,103 @@
 <%@ include file="../common/footer.jsp" %>
 
 <script>
-    const courseId = '${coursId}';
+const courseId = '${coursId}';
 
-    document.addEventListener('DOMContentLoaded', () => {
-        loadCourseDetails();
-        document.getElementById('deleteBtn').addEventListener('click', deleteCours);
-    });
+let currentUserCourses = [];
 
-    async function loadCourseDetails() {
-        try {
-            // Fetch single course directly using the teacher API
-            const response = await fetch('/api/enseignant/cours/' + courseId);
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadCurrentUserCourses();
+    await loadCourseDetails();
+});
 
-            if (response.ok) {
-                const course = await response.json();
-                renderCourse(course);
-            } else {
-                throw new Error('Course not found or access denied');
-            }
-        } catch (e) {
-            console.error(e);
-            showError();
+async function loadCurrentUserCourses() {
+    try {
+        const res = await fetch('/api/enseignant/cours');
+        if (res.ok) {
+            currentUserCourses = await res.json();
         }
+    } catch (e) {
+        console.error("Failed to load user courses");
     }
+}
 
-    function renderCourse(course) {
-        document.title = course.titre + ' - FPL Academy';
-        document.getElementById('coursTitle').textContent = course.titre;
-        document.getElementById('coursContent').innerHTML = course.contenu || '<p class="text-muted">Aucun contenu disponible.</p>';
+async function loadCourseDetails() {
+    try {
+        // ✅ PUBLIC ENDPOINT
+        const response = await fetch('/api/cours/' + courseId);
+
+        if (!response.ok) throw new Error('Course not found');
+
+        const course = await response.json();
+        renderCourse(course);
+
+    } catch (e) {
+        console.error(e);
+        showError();
+    }
+}
+
+function renderCourse(course) {
+    document.title = course.titre + ' - FPL Academy';
+    document.getElementById('coursTitle').textContent = course.titre;
+    document.getElementById('coursContent').innerHTML =
+        course.contenu || '<p class="text-muted">Aucun contenu disponible.</p>';
+
+    const teacher = course.enseignant;
+    const username = (teacher && teacher.username) ? teacher.username : 'Inconnu';
+    const initial = username.charAt(0).toUpperCase();
+
+    document.getElementById('instructorInfo').innerHTML = `
+        <div class="instructor-avatar">\${initial}</div>
+        <div>
+            <div class="instructor-name">\${escapeHtml(username)}</div>
+            <div class="instructor-title">Enseignant</div>
+        </div>
+    `;
+
+    // ✅ Check if current user owns this course
+    const isOwner = currentUserCourses.some(c => c.id == course.id);
+
+    if (isOwner) {
         document.getElementById('editLink').href = '/enseignant/modifier/' + course.id;
-
-        // Render Instructor (Self)
-        const teacher = course.enseignant;
-        const username = (teacher && teacher.username) ? teacher.username : 'Moi';
-        const initial = username.charAt(0).toUpperCase();
-
-        document.getElementById('instructorInfo').innerHTML = `
-            <div class="instructor-avatar">\${initial}</div>
-            <div>
-                <div class="instructor-name">\${escapeHtml(username)}</div>
-                <div class="instructor-title">Enseignant (Vous)</div>
-            </div>
-        `;
+        document.getElementById('deleteBtn').addEventListener('click', deleteCours);
+    } else {
+        // ❌ Hide buttons if not owner
+        document.getElementById('editLink').style.display = 'none';
+        document.getElementById('deleteBtn').style.display = 'none';
     }
+}
 
-    async function deleteCours() {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce cours ? Cette action est irréversible.')) return;
+async function deleteCours() {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce cours ? Cette action est irréversible.')) return;
 
-        try {
-            const response = await fetch(`/api/enseignant/cours/\${courseId}`, { method: 'DELETE' });
-            if (!response.ok) throw new Error('Failed to delete course');
-            window.location.href = '/enseignant/dashboard?success=deleted';
-        } catch (error) {
-            console.error('Error deleting course:', error);
-            alert('Erreur lors de la suppression du cours.');
-        }
+    try {
+        const response = await fetch('/api/enseignant/cours/' + courseId, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete course');
+
+        window.location.href = '/enseignant/dashboard?success=deleted';
+
+    } catch (error) {
+        console.error('Error deleting course:', error);
+        alert('Erreur lors de la suppression du cours.');
     }
+}
 
-    function showError() {
-        document.getElementById('coursContent').innerHTML =
-            '<div class="text-center py-5">' +
-            '<i class="fas fa-exclamation-circle" style="color: #94a3b8; font-size: 2.5rem; margin-bottom: 1rem;"></i>' +
-            '<h5 style="color: #475569;">Erreur de chargement</h5>' +
-            '<p style="color: #64748b;">Impossible de charger les détails du cours.</p>' +
-            '</div>';
-    }
+function showError() {
+    document.getElementById('coursContent').innerHTML =
+        '<div class="text-center py-5">' +
+        '<i class="fas fa-exclamation-circle" style="color: #94a3b8; font-size: 2.5rem; margin-bottom: 1rem;"></i>' +
+        '<h5 style="color: #475569;">Erreur de chargement</h5>' +
+        '<p style="color: #64748b;">Impossible de charger les détails du cours.</p>' +
+        '</div>';
+}
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        var div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+function escapeHtml(text) {
+    if (!text) return '';
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 </script>
 
 </body>

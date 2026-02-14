@@ -3,15 +3,12 @@ package fpl.platform.controller.rest;
 import fpl.platform.dto.CoursStatsDTO;
 import fpl.platform.model.Cours;
 import fpl.platform.model.Inscription;
-import fpl.platform.model.User;
-import fpl.platform.repository.CoursRepository;
-import fpl.platform.repository.InscriptionRepository;
-import fpl.platform.repository.UserRepository;
+import fpl.platform.service.EnseignantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -20,38 +17,17 @@ import java.util.List;
 public class EnseignantRestController {
 
     @Autowired
-    private CoursRepository coursRepo;
-    
-    @Autowired
-    private UserRepository userRepo;
-
-    @Autowired
-    private InscriptionRepository inscriptionRepo;
+    private EnseignantService enseignantService;
 
     @GetMapping("/cours")
     public ResponseEntity<List<CoursStatsDTO>> getMesCours(Authentication auth) {
-
-        User prof = userRepo.findByUsername(auth.getName());
-        List<Cours> coursList = coursRepo.findByEnseignant(prof);
-
-        List<CoursStatsDTO> result = coursList.stream().map(c -> {
-            long count = inscriptionRepo.countByCoursId(c.getId());
-            return new CoursStatsDTO(
-                    c.getId(),
-                    c.getTitre(),
-                    c.getDescription(),
-                    count
-            );
-        }).toList();
-
+        List<CoursStatsDTO> result = enseignantService.getMesCours(auth.getName());
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/cours")
     public ResponseEntity<Cours> creerCours(@RequestBody Cours cours, Authentication auth) {
-        User prof = userRepo.findByUsername(auth.getName());
-        cours.setEnseignant(prof);
-        Cours saved = coursRepo.save(cours);
+        Cours saved = enseignantService.creerCours(cours, auth.getName());
         return ResponseEntity.ok(saved);
     }
 
@@ -60,14 +36,10 @@ public class EnseignantRestController {
             @PathVariable Long id,
             Authentication auth) {
 
-        User prof = userRepo.findByUsername(auth.getName());
-
-        return coursRepo.findById(id)
-                .filter(c -> c.getEnseignant().getId().equals(prof.getId()))
+        return enseignantService.getCoursByIdAndEnseignant(id, auth.getName())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
     }
-
 
     @PutMapping("/cours/{id}")
     public ResponseEntity<Cours> modifierCours(
@@ -75,16 +47,8 @@ public class EnseignantRestController {
             @RequestBody Cours coursDetails,
             Authentication auth) {
 
-        User prof = userRepo.findByUsername(auth.getName());
-
-        return coursRepo.findById(id)
-                .filter(c -> c.getEnseignant().getId().equals(prof.getId()))
-                .map(cours -> {
-                    cours.setTitre(coursDetails.getTitre());
-                    cours.setDescription(coursDetails.getDescription());
-                    cours.setContenu(coursDetails.getContenu());
-                    return ResponseEntity.ok(coursRepo.save(cours));
-                })
+        return enseignantService.modifierCours(id, coursDetails, auth.getName())
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
     }
 
@@ -93,25 +57,22 @@ public class EnseignantRestController {
             @PathVariable Long id,
             Authentication auth) {
 
-        User prof = userRepo.findByUsername(auth.getName());
-        Cours cours = coursRepo.findById(id).orElse(null);
+        Boolean result = enseignantService.supprimerCours(id, auth.getName());
 
-        if (cours == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if (!cours.getEnseignant().getId().equals(prof.getId())) {
+        if (result == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
-        coursRepo.delete(cours);
-        return ResponseEntity.ok().build();
+        
+        if (result) {
+            return ResponseEntity.ok().build();
+        }
+        
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/cours/{coursId}/inscriptions")
     public ResponseEntity<List<Inscription>> getInscriptionsParCours(@PathVariable Long coursId) {
-        
-        List<Inscription> inscriptions = inscriptionRepo.findByCoursId(coursId);
+        List<Inscription> inscriptions = enseignantService.getInscriptionsParCours(coursId);
         return ResponseEntity.ok(inscriptions);
     }
 }
