@@ -1,7 +1,7 @@
 package fpl.platform.controller.rest;
 
 import fpl.platform.model.User;
-import fpl.platform.service.AppService;
+import fpl.platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,12 +14,12 @@ import java.util.Map;
 public class UserRestController {
 
     @Autowired
-    private AppService appService;
+    private UserService userService;
 
     @PostMapping("/inscription")
     public ResponseEntity<?> inscrireUtilisateur(@RequestBody User user) {
         try {
-            appService.enregistrerUtilisateur(user);
+            userService.enregistrerUtilisateur(user);
             Map<String, String> response = new HashMap<>();
             response.put("message", "Inscription réussie");
             response.put("username", user.getUsername());

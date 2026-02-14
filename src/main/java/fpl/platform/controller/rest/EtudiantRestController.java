@@ -1,14 +1,11 @@
 package fpl.platform.controller.rest;
 
 import fpl.platform.model.Inscription;
-import fpl.platform.model.User;
-import fpl.platform.repository.InscriptionRepository;
-import fpl.platform.repository.UserRepository;
+import fpl.platform.service.EtudiantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,10 +16,7 @@ import java.util.List;
 public class EtudiantRestController {
 
     @Autowired
-    private InscriptionRepository inscriptionRepo;
-
-    @Autowired
-    private UserRepository userRepo;
+    private EtudiantService etudiantService;
 
     /**
      * Récupère la liste des cours auxquels l'étudiant connecté est inscrit.
@@ -30,27 +24,8 @@ public class EtudiantRestController {
      */
     @GetMapping("/mes-cours")
     public ResponseEntity<List<Inscription>> getMesCours(Authentication auth) {
-        // 1. Trouver l'utilisateur connecté en base
-        User etudiant = userRepo.findByUsername(auth.getName());
-        
-        // 2. Récupérer ses inscriptions via le repository
-        List<Inscription> inscriptions = inscriptionRepo.findByEtudiant(etudiant);
-        
+        List<Inscription> inscriptions = etudiantService.getMesCours(auth.getName());
         return ResponseEntity.ok(inscriptions);
     }
-    
-//    @GetMapping("/cours/{id}")
-//    public ResponseEntity<Inscription> getCoursEtudiant(
-//            @PathVariable Long id,
-//            Authentication auth) {
-//
-//        User etudiant = userRepo.findByUsername(auth.getName());
-//
-//        Inscription inscription = inscriptionRepo
-//                .findByEtudiantIdAndCoursId(id, etudiant.getId())
-//                .orElseThrow(() -> new RuntimeException("Not enrolled"));
-//
-//        return ResponseEntity.ok(inscription);
-//    }
 
 }
